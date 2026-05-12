@@ -16,30 +16,40 @@ EthioTour Connect is a Java Swing tourism management prototype for Ethiopian tra
 
 ## How To Run
 
-Use the included batch file:
+### Option 1: Maven (Recommended)
+This project now uses Maven for dependency management and building.
 
+```bash
+mvn clean package
+java -jar target/ethiotour-connect-1.0-SNAPSHOT.jar
+```
+
+### Option 2: Docker
+You can build and run the application in a container (requires X11 forwarding for the GUI).
+
+```bash
+# Build the image
+docker build -t ethiotour-connect .
+
+# Run the image (Linux/X11 example)
+docker run -it --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix ethiotour-connect
+```
+
+### Option 3: Standard Batch File
+The legacy `run.bat` is still available for simple local runs without Maven.
 ```bat
 run.bat
 ```
 
-Or compile and run manually:
-
-```bat
-mkdir build\classes
-javac -d build\classes -cp . src\main\java\com\ethiotour\model\*.java src\main\java\com\ethiotour\util\*.java src\main\java\com\ethiotour\service\*.java src\main\java\com\ethiotour\controller\*.java src\main\java\com\ethiotour\view\*.java src\main\java\com\ethiotour\EthioTourApp.java src\main\java\com\ethiotour\DemoApp.java
-java -cp build\classes com.ethiotour.EthioTourApp
-```
-
-To run the console demo:
-
-```bat
-java -cp build\classes com.ethiotour.DemoApp
-```
+## CI/CD
+The project includes a GitHub Actions workflow in `.github/workflows/build.yml` that automatically builds the project and uploads the JAR artifact on every push.
 
 ## Project Structure
 
 ```text
-java-swing/
+|-- pom.xml
+|-- Dockerfile
+|-- .github/workflows/build.yml
 |-- README.md
 |-- run.bat
 |-- .gitignore

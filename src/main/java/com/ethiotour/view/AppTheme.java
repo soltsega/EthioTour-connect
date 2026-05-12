@@ -1,48 +1,58 @@
 package com.ethiotour.view;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.UIManager;
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import javax.swing.*;
 import javax.swing.border.Border;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Font;
+import java.awt.*;
 
 final class AppTheme {
-    static final Color BACKGROUND = new Color(246, 248, 245);
+    static final Color BACKGROUND = new Color(248, 250, 252);
     static final Color SURFACE = Color.WHITE;
-    static final Color TEXT = new Color(21, 31, 27);
-    static final Color MUTED_TEXT = new Color(65, 76, 70);
-    static final Color PRIMARY = new Color(18, 86, 62);
-    static final Color PRIMARY_DARK = new Color(9, 52, 38);
-    static final Color PRIMARY_SOFT = new Color(218, 237, 228);
-    static final Color ACCENT = new Color(166, 103, 14);
-    static final Color BORDER = new Color(170, 184, 176);
-    static final Color STRONG_BORDER = new Color(86, 112, 99);
-    static final Color DANGER = new Color(148, 38, 34);
+    static final Color TEXT = new Color(15, 23, 42);
+    static final Color MUTED_TEXT = new Color(100, 116, 139);
+    static final Color PRIMARY = new Color(15, 118, 110); // Teal 700
+    static final Color PRIMARY_DARK = new Color(13, 148, 136); // Teal 600
+    static final Color PRIMARY_SOFT = new Color(204, 251, 241); // Teal 100
+    static final Color ACCENT = new Color(217, 119, 6); // Amber 600
+    static final Color BORDER = new Color(226, 232, 240); // Slate 200
+    static final Color STRONG_BORDER = new Color(203, 213, 225); // Slate 300
+    static final Color DANGER = new Color(225, 29, 72); // Rose 600
 
-    static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 28);
-    static final Font SECTION_FONT = new Font("Segoe UI", Font.BOLD, 16);
-    static final Font BODY_FONT = new Font("Segoe UI", Font.PLAIN, 13);
-    static final Font SMALL_FONT = new Font("Segoe UI", Font.PLAIN, 12);
+    static final Font TITLE_FONT = new Font("Inter", Font.BOLD, 32);
+    static final Font SECTION_FONT = new Font("Inter", Font.BOLD, 18);
+    static final Font BODY_FONT = new Font("Inter", Font.PLAIN, 14);
+    static final Font SMALL_FONT = new Font("Inter", Font.PLAIN, 12);
 
     private AppTheme() {
     }
 
-    static void applyDefaults() {
-        UIManager.put("Button.select", PRIMARY_DARK);
-        UIManager.put("Button.focus", ACCENT);
-        UIManager.put("ComboBox.selectionBackground", PRIMARY_DARK);
-        UIManager.put("ComboBox.selectionForeground", Color.WHITE);
-        UIManager.put("TextField.selectionBackground", PRIMARY_DARK);
-        UIManager.put("TextField.selectionForeground", Color.WHITE);
-        UIManager.put("TextArea.selectionBackground", PRIMARY_DARK);
-        UIManager.put("TextArea.selectionForeground", Color.WHITE);
-        UIManager.put("Table.selectionBackground", PRIMARY_DARK);
-        UIManager.put("Table.selectionForeground", Color.WHITE);
+    static void apply() {
+        try {
+            FlatLightLaf.setup();
+            
+            // Custom UI properties for FlatLaf
+            UIManager.put("Button.arc", 8);
+            UIManager.put("Component.arc", 8);
+            UIManager.put("TextComponent.arc", 8);
+            UIManager.put("ProgressBar.arc", 8);
+            
+            UIManager.put("ScrollBar.width", 12);
+            UIManager.put("ScrollBar.thumbArc", 999);
+            
+            UIManager.put("Table.showHorizontalLines", true);
+            UIManager.put("Table.showVerticalLines", false);
+            UIManager.put("Table.intercellSpacing", new Dimension(0, 1));
+            UIManager.put("Table.selectionBackground", PRIMARY_SOFT);
+            UIManager.put("Table.selectionForeground", TEXT);
+            
+            UIManager.put("Component.focusWidth", 1);
+            UIManager.put("Component.innerFocusWidth", 0);
+            
+        } catch (Exception ex) {
+            System.err.println("Failed to initialize FlatLaf");
+        }
     }
 
     static void stylePrimaryButton(JButton button) {

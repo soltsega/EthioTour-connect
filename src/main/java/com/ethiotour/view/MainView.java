@@ -9,6 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.util.List;
+import com.formdev.flatlaf.FlatClientProperties;
 import javax.swing.*;
 
 public class MainView extends JFrame {
@@ -147,24 +148,25 @@ public class MainView extends JFrame {
     private JPanel createMetricPanel(String label, String value, String caption) {
         JPanel panel = new JPanel(new BorderLayout(0, 8));
         panel.setBackground(AppTheme.SURFACE);
+        panel.putClientProperty(FlatClientProperties.STYLE, "arc: 12; background: #ffffff;");
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(AppTheme.BORDER),
-            BorderFactory.createEmptyBorder(16, 18, 16, 18)
+            BorderFactory.createLineBorder(AppTheme.BORDER, 1),
+            BorderFactory.createEmptyBorder(20, 24, 20, 24)
         ));
         
         JLabel valueLabel = new JLabel(value);
-        valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        valueLabel.setFont(new Font("Inter", Font.BOLD, 32));
         valueLabel.setForeground(AppTheme.PRIMARY);
         
         JLabel labelComponent = new JLabel(label);
-        labelComponent.setFont(AppTheme.SECTION_FONT);
+        labelComponent.setFont(new Font("Inter", Font.BOLD, 15));
         labelComponent.setForeground(AppTheme.TEXT);
         
         JLabel captionLabel = new JLabel(caption);
         captionLabel.setFont(AppTheme.SMALL_FONT);
         captionLabel.setForeground(AppTheme.MUTED_TEXT);
         
-        JPanel textPanel = new JPanel(new GridLayout(2, 1, 0, 2));
+        JPanel textPanel = new JPanel(new GridLayout(2, 1, 0, 4));
         textPanel.setOpaque(false);
         textPanel.add(labelComponent);
         textPanel.add(captionLabel);
@@ -175,22 +177,24 @@ public class MainView extends JFrame {
     }
 
     private JButton createModuleButton(String title, String description) {
-        String text = "<html><div style='font-size:15px;font-weight:bold;color:#ffffff;'>" + title + "</div>"
-            + "<div style='font-size:11px;font-weight:normal;color:#e5f0ea;margin-top:6px;'>" + description + "</div></html>";
+        String text = "<html><div style='font-family:Inter; padding-left:4px;'>"
+            + "<div style='font-size:16px; font-weight:bold; color:#ffffff;'>" + title + "</div>"
+            + "<div style='font-size:11px; font-weight:normal; color:#ccfbf1; margin-top:4px;'>" + description + "</div>"
+            + "</div></html>";
         JButton button = new JButton(text);
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setBackground(AppTheme.PRIMARY);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
-        button.setOpaque(true);
-        button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 8, 0, 0, AppTheme.ACCENT),
-            BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(AppTheme.PRIMARY_DARK),
-                BorderFactory.createEmptyBorder(18, 22, 18, 20)
-            )
-        ));
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        
+        // FlatLaf styling
+        button.putClientProperty(FlatClientProperties.STYLE, "arc: 12;");
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 6, 0, 0, AppTheme.ACCENT),
+            BorderFactory.createEmptyBorder(24, 24, 24, 24)
+        ));
+        
         addHoverState(button);
         return button;
     }
@@ -220,24 +224,10 @@ public class MainView extends JFrame {
         button.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
                 button.setBackground(AppTheme.PRIMARY_DARK);
-                button.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 8, 0, 0, new Color(214, 146, 33)),
-                    BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(AppTheme.PRIMARY_DARK),
-                        BorderFactory.createEmptyBorder(18, 22, 18, 20)
-                    )
-                ));
             }
 
             public void mouseExited(MouseEvent e) {
                 button.setBackground(AppTheme.PRIMARY);
-                button.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 8, 0, 0, AppTheme.ACCENT),
-                    BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(AppTheme.PRIMARY_DARK),
-                        BorderFactory.createEmptyBorder(18, 22, 18, 20)
-                    )
-                ));
             }
         });
     }
@@ -258,7 +248,7 @@ public class MainView extends JFrame {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            AppTheme.applyDefaults();
+            AppTheme.apply();
             
             MainView mainView = new MainView();
             mainView.setVisible(true);
