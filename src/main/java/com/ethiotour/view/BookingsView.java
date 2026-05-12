@@ -1,0 +1,421 @@
+package com.ethiotour.view;
+
+import com.ethiotour.controller.MainController;
+import com.ethiotour.model.Booking;
+import com.ethiotour.model.Tour;
+import com.ethiotour.service.DatabaseService;
+import com.ethiotour.service.BookingService;
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+
+public class BookingsView extends JFrame {
+    private MainController controller;
+    private DatabaseService dbService;
+    private BookingService bookingService;
+    
+    private JTable bookingsTable;
+    private DefaultTableModel tableModel;
+    private JButton newBookingButton;
+    private JButton confirmButton;
+    private JButton processPaymentButton;
+    private JButton cancelButton;
+    private JButton backButton;
+    private JComboBox<Tour> tourCombo;
+    private JTextField customerNameField;
+    private JTextField customerEmailField;
+    private JTextField customerPhoneField;
+    private JCheckBox residentCheckBox;
+    private JTextField participantsField;
+    private JLabel priceLabel;
+    private JButton createBookingButton;
+    private JButton cancelNewBookingButton;
+    private JPanel newBookingPanel;
+    
+    public BookingsView(MainController controller) {
+        this.controller = controller;
+        this.dbService = DatabaseService.getInstance();
+        this.bookingService = new BookingService();
+        initializeComponents();
+        setupLayout();
+        setupEventHandlers();
+        loadBookings();
+    }
+    
+    private void initializeComponents() {
+        setTitle("Manage Bookings - EthioTour Connect");
+        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        setSize(1100, 700);
+        setLocationRelativeTo(null);
+        getContentPane().setBackground(AppTheme.BACKGROUND);
+        
+        // Table setup
+        String[] columns = {"ID", "Customer", "Email", "Tour", "Participants", 
+                           "Total Price", "Status", "Payment Method", "Booking Date"};
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        bookingsTable = new JTable(tableModel);
+        bookingsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        bookingsTable.getTableHeader().setReorderingAllowed(false);
+        AppTheme.styleTable(bookingsTable);
+        
+        // Action buttons
+        newBookingButton = new JButton("New Booking");
+        confirmButton = new JButton("Confirm Selected");
+        processPaymentButton = new JButton("Process Payment");
+        cancelButton = new JButton("Cancel Selected");
+        backButton = new JButton("Back to Main");
+        AppTheme.stylePrimaryButton(newBookingButton);
+        AppTheme.styleSecondaryButton(confirmButton);
+        AppTheme.styleSecondaryButton(processPaymentButton);
+        AppTheme.styleDangerButton(cancelButton);
+        AppTheme.styleSecondaryButton(backButton);
+        
+        // New booking form
+        tourCombo = new JComboBox<>();
+        loadToursCombo();
+        customerNameField = new JTextField(20);
+        customerEmailField = new JTextField(20);
+        customerPhoneField = new JTextField(15);
+        residentCheckBox = new JCheckBox("Ethiopian Resident");
+        participantsField = new JTextField(8);
+        priceLabel = new JLabel("Price: $0.00");
+        createBookingButton = new JButton("Create Booking");
+        cancelNewBookingButton = new JButton("Cancel");
+        AppTheme.stylePrimaryButton(createBookingButton);
+        AppTheme.styleSecondaryButton(cancelNewBookingButton);
+        
+        // New booking panel
+        newBookingPanel = new JPanel(new GridBagLayout());
+        newBookingPanel.setBackground(AppTheme.SURFACE);
+        newBookingPanel.setBorder(AppTheme.panelBorder("New Booking"));
+        newBookingPanel.setVisible(false);
+    }
+    
+    private void setupLayout() {
+        setLayout(new BorderLayout());
+        
+        // Top panel with buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.setBackground(AppTheme.BACKGROUND);
+        buttonPanel.add(newBookingButton);
+        buttonPanel.add(confirmButton);
+        buttonPanel.add(processPaymentButton);
+        buttonPanel.add(cancelButton);
+        buttonPanel.add(Box.createHorizontalStrut(20));
+        buttonPanel.add(backButton);
+        
+        // Table panel
+        JScrollPane tableScrollPane = new JScrollPane(bookingsTable);
+        tableScrollPane.setPreferredSize(new Dimension(1050, 350));
+        
+        // New booking panel setup
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+        
+        gbc.gridx = 0; gbc.gridy = 0;
+        newBookingPanel.add(new JLabel("Tour:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        newBookingPanel.add(tourCombo, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 1; gbc.fill = GridBagConstraints.NONE;
+        newBookingPanel.add(new JLabel("Customer Name:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        newBookingPanel.add(customerNameField, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 2; gbc.fill = GridBagConstraints.NONE;
+        newBookingPanel.add(new JLabel("Email:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        newBookingPanel.add(customerEmailField, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 3; gbc.fill = GridBagConstraints.NONE;
+        newBookingPanel.add(new JLabel("Phone:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        newBookingPanel.add(customerPhoneField, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 4; gbc.fill = GridBagConstraints.NONE;
+        newBookingPanel.add(new JLabel("Participants:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        newBookingPanel.add(participantsField, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 5; gbc.fill = GridBagConstraints.NONE;
+        newBookingPanel.add(residentCheckBox, gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
+        newBookingPanel.add(priceLabel, gbc);
+        
+        // New booking buttons
+        JPanel bookingButtonPanel = new JPanel(new FlowLayout());
+        bookingButtonPanel.add(createBookingButton);
+        bookingButtonPanel.add(cancelNewBookingButton);
+        bookingButtonPanel.setBackground(AppTheme.SURFACE);
+        
+        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        newBookingPanel.add(bookingButtonPanel, gbc);
+        
+        // Add components to main frame
+        add(buttonPanel, BorderLayout.NORTH);
+        add(tableScrollPane, BorderLayout.CENTER);
+        add(newBookingPanel, BorderLayout.SOUTH);
+    }
+    
+    private void setupEventHandlers() {
+        newBookingButton.addActionListener(e -> showNewBookingPanel());
+        confirmButton.addActionListener(e -> confirmSelectedBooking());
+        processPaymentButton.addActionListener(e -> processPaymentForSelected());
+        cancelButton.addActionListener(e -> cancelSelectedBooking());
+        backButton.addActionListener(e -> controller.returnToMain());
+        
+        createBookingButton.addActionListener(e -> createNewBooking());
+        cancelNewBookingButton.addActionListener(e -> hideNewBookingPanel());
+        
+        // Update price when selection changes
+        tourCombo.addActionListener(e -> updatePrice());
+        participantsField.addActionListener(e -> updatePrice());
+        residentCheckBox.addActionListener(e -> updatePrice());
+        participantsField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { updatePrice(); }
+            public void removeUpdate(DocumentEvent e) { updatePrice(); }
+            public void changedUpdate(DocumentEvent e) { updatePrice(); }
+        });
+    }
+    
+    private void loadToursCombo() {
+        tourCombo.removeAllItems();
+        List<Tour> tours = dbService.getAllTours();
+        for (Tour tour : tours) {
+            if (tour.hasAvailability()) {
+                tourCombo.addItem(tour);
+            }
+        }
+    }
+    
+    private void loadBookings() {
+        tableModel.setRowCount(0);
+        List<Booking> bookings = dbService.getAllBookings();
+        
+        for (Booking booking : bookings) {
+            Tour tour = dbService.getTourById(booking.getTourId());
+            Object[] row = {
+                booking.getId(),
+                booking.getCustomerName(),
+                booking.getCustomerEmail(),
+                tour != null ? tour.getName() : "Unknown Tour",
+                booking.getParticipantsCount(),
+                String.format("$%.2f", booking.getTotalPrice()),
+                booking.getStatus().toString(),
+                booking.getPaymentMethod() != null ? booking.getPaymentMethod() : "N/A",
+                booking.getBookingDate().toString()
+            };
+            tableModel.addRow(row);
+        }
+    }
+    
+    private void showNewBookingPanel() {
+        loadToursCombo();
+        clearNewBookingFields();
+        newBookingPanel.setVisible(true);
+        customerNameField.requestFocus();
+    }
+    
+    private void hideNewBookingPanel() {
+        newBookingPanel.setVisible(false);
+        clearNewBookingFields();
+    }
+    
+    private void clearNewBookingFields() {
+        customerNameField.setText("");
+        customerEmailField.setText("");
+        customerPhoneField.setText("");
+        participantsField.setText("1");
+        residentCheckBox.setSelected(false);
+        priceLabel.setText("Price: $0.00");
+    }
+    
+    private void updatePrice() {
+        try {
+            Tour selectedTour = (Tour) tourCombo.getSelectedItem();
+            if (selectedTour == null) {
+                priceLabel.setText("Price: $0.00");
+                return;
+            }
+            
+            int participants = Integer.parseInt(participantsField.getText().trim());
+            boolean isResident = residentCheckBox.isSelected();
+            
+            double price = bookingService.calculatePrice(selectedTour.getId(), participants, isResident);
+            priceLabel.setText(String.format("Price: $%.2f", price));
+            
+        } catch (NumberFormatException ex) {
+            priceLabel.setText("Price: $0.00");
+        }
+    }
+    
+    private void createNewBooking() {
+        try {
+            Tour selectedTour = (Tour) tourCombo.getSelectedItem();
+            if (selectedTour == null) {
+                JOptionPane.showMessageDialog(this, "Please select a tour.", 
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            String customerName = customerNameField.getText().trim();
+            String customerEmail = customerEmailField.getText().trim();
+            String customerPhone = customerPhoneField.getText().trim();
+            String participantsText = participantsField.getText().trim();
+            boolean isResident = residentCheckBox.isSelected();
+            
+            if (customerName.isEmpty() || customerEmail.isEmpty() || 
+                customerPhone.isEmpty() || participantsText.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "All fields are required.", 
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            int participants = Integer.parseInt(participantsText);
+            
+            // Validate booking
+            BookingService.BookingValidationResult validation = 
+                bookingService.validateBooking(selectedTour.getId(), participants, isResident);
+            
+            if (!validation.isValid()) {
+                JOptionPane.showMessageDialog(this, validation.getMessage(), 
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            // Create booking
+            Booking booking = bookingService.createBooking(
+                selectedTour.getId(), customerName, customerEmail, 
+                customerPhone, isResident, participants);
+            
+            loadBookings();
+            loadToursCombo();
+            hideNewBookingPanel();
+            
+            JOptionPane.showMessageDialog(this, 
+                "Booking created successfully!\nBooking ID: " + booking.getId() + 
+                "\nTotal Price: $" + String.format("%.2f", booking.getTotalPrice()), 
+                "Success", JOptionPane.INFORMATION_MESSAGE);
+                
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error creating booking: " + ex.getMessage(), 
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void confirmSelectedBooking() {
+        int selectedRow = bookingsTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a booking to confirm.", 
+                "No Selection", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        int bookingId = (Integer) tableModel.getValueAt(selectedRow, 0);
+        Booking booking = dbService.getBookingById(bookingId);
+        
+        if (booking.getStatus() != Booking.BookingStatus.PENDING_CONFIRMATION) {
+            JOptionPane.showMessageDialog(this, "Only pending bookings can be confirmed.", 
+                "Invalid Status", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        String paymentMethod = JOptionPane.showInputDialog(this, 
+            "Enter payment method (e.g., Telebirr, Bank Transfer):", 
+            "Payment Method", JOptionPane.QUESTION_MESSAGE);
+        
+        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
+            String paymentReference = JOptionPane.showInputDialog(this, 
+                "Enter payment reference:", "Payment Reference", JOptionPane.QUESTION_MESSAGE);
+            
+            if (paymentReference != null && !paymentReference.trim().isEmpty()) {
+                boolean success = bookingService.confirmBooking(bookingId, paymentMethod.trim(), paymentReference.trim());
+                
+                if (success) {
+                    loadBookings();
+                    JOptionPane.showMessageDialog(this, "Booking confirmed successfully.", 
+                        "Success", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Failed to confirm booking.", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }
+    
+    private void processPaymentForSelected() {
+        int selectedRow = bookingsTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a booking to process payment for.", 
+                "No Selection", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        int bookingId = (Integer) tableModel.getValueAt(selectedRow, 0);
+        Booking booking = dbService.getBookingById(bookingId);
+        
+        if (booking.getStatus() != Booking.BookingStatus.CONFIRMED) {
+            JOptionPane.showMessageDialog(this, "Only confirmed bookings can have payments processed.", 
+                "Invalid Status", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Process payment for booking #" + bookingId + "?\nAmount: $" + 
+            String.format("%.2f", booking.getTotalPrice()), 
+            "Confirm Payment Processing", JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            boolean success = bookingService.processPayment(bookingId);
+            
+            if (success) {
+                loadBookings();
+                JOptionPane.showMessageDialog(this, "Payment processed successfully.", 
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to process payment.", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
+    private void cancelSelectedBooking() {
+        int selectedRow = bookingsTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a booking to cancel.", 
+                "No Selection", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        int bookingId = (Integer) tableModel.getValueAt(selectedRow, 0);
+        
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Are you sure you want to cancel booking #" + bookingId + "?", 
+            "Confirm Cancellation", JOptionPane.YES_NO_OPTION);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            boolean success = bookingService.cancelBooking(bookingId);
+            
+            if (success) {
+                loadBookings();
+                loadToursCombo();
+                JOptionPane.showMessageDialog(this, "Booking cancelled successfully.", 
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to cancel booking.", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
+}
