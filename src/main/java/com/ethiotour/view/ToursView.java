@@ -3,7 +3,8 @@ package com.ethiotour.view;
 import com.ethiotour.controller.MainController;
 import com.ethiotour.model.Tour;
 import com.ethiotour.model.Destination;
-import com.ethiotour.service.DatabaseService;
+import com.ethiotour.service.IDatabaseService;
+import com.ethiotour.service.DatabaseServiceFactory;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class ToursView extends JFrame {
     private MainController controller;
-    private DatabaseService dbService;
+    private IDatabaseService dbService;
     
     private JTable toursTable;
     private DefaultTableModel tableModel;
@@ -35,7 +36,7 @@ public class ToursView extends JFrame {
     
     public ToursView(MainController controller) {
         this.controller = controller;
-        this.dbService = DatabaseService.getInstance();
+        this.dbService = DatabaseServiceFactory.getDatabaseService();
         initializeComponents();
         setupLayout();
         setupEventHandlers();
@@ -252,7 +253,9 @@ public class ToursView extends JFrame {
             residentPriceField.setText(String.valueOf(tour.getResidentPrice()));
             nonResidentPriceField.setText(String.valueOf(tour.getNonResidentPrice()));
         } else {
-            destinationCombo.setSelectedIndex(0);
+            if (destinationCombo.getItemCount() > 0) {
+                destinationCombo.setSelectedIndex(0);
+            }
             nameField.setText("");
             descriptionArea.setText("");
             startDateField.setText("");

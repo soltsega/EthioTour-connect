@@ -2,7 +2,8 @@ package com.ethiotour.view;
 
 import com.ethiotour.controller.MainController;
 import com.ethiotour.model.Destination;
-import com.ethiotour.service.DatabaseService;
+import com.ethiotour.service.IDatabaseService;
+import com.ethiotour.service.DatabaseServiceFactory;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class DestinationsView extends JFrame {
     private MainController controller;
-    private DatabaseService dbService;
+    private IDatabaseService dbService;
     
     private JTable destinationsTable;
     private DefaultTableModel tableModel;
@@ -30,7 +31,7 @@ public class DestinationsView extends JFrame {
     
     public DestinationsView(MainController controller) {
         this.controller = controller;
-        this.dbService = DatabaseService.getInstance();
+        this.dbService = DatabaseServiceFactory.getDatabaseService();
         initializeComponents();
         setupLayout();
         setupEventHandlers();

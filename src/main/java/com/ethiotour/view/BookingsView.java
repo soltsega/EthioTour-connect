@@ -3,7 +3,8 @@ package com.ethiotour.view;
 import com.ethiotour.controller.MainController;
 import com.ethiotour.model.Booking;
 import com.ethiotour.model.Tour;
-import com.ethiotour.service.DatabaseService;
+import com.ethiotour.service.IDatabaseService;
+import com.ethiotour.service.DatabaseServiceFactory;
 import com.ethiotour.service.BookingService;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public class BookingsView extends JFrame {
     private MainController controller;
-    private DatabaseService dbService;
+    private IDatabaseService dbService;
     private BookingService bookingService;
     
     private JTable bookingsTable;
@@ -37,7 +38,7 @@ public class BookingsView extends JFrame {
     
     public BookingsView(MainController controller) {
         this.controller = controller;
-        this.dbService = DatabaseService.getInstance();
+        this.dbService = DatabaseServiceFactory.getDatabaseService();
         this.bookingService = new BookingService();
         initializeComponents();
         setupLayout();
