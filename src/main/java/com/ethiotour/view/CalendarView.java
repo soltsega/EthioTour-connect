@@ -14,7 +14,7 @@ public class CalendarView extends JFrame {
     private JLabel ethiopianDateLabel;
     private JLabel holidayLabel;
     private JLabel seasonLabel;
-    private JTextArea holidayInfoArea;
+    private JPanel holidayListPanel;
     private JButton backButton;
     private JButton convertButton;
     private JTextField gregorianInputField;
@@ -52,12 +52,10 @@ public class CalendarView extends JFrame {
         seasonLabel.setFont(AppTheme.BODY_FONT);
         seasonLabel.setForeground(AppTheme.MUTED_TEXT);
         
-        // Holiday information
-        holidayInfoArea = new JTextArea(8, 40);
-        holidayInfoArea.setEditable(false);
-        holidayInfoArea.setLineWrap(true);
-        holidayInfoArea.setWrapStyleWord(true);
-        holidayInfoArea.setFont(AppTheme.BODY_FONT);
+        // Holiday information list
+        holidayListPanel = new JPanel();
+        holidayListPanel.setLayout(new BoxLayout(holidayListPanel, BoxLayout.Y_AXIS));
+        holidayListPanel.setBackground(AppTheme.CARD_BG);
         
         // Conversion tools
         convertButton = new JButton("Convert Date");
@@ -115,11 +113,11 @@ public class CalendarView extends JFrame {
         // Card 2: Holidays
         JPanel holidayCard = new JPanel(new BorderLayout(0, 10));
         AppTheme.styleCard(holidayCard);
-        holidayCard.add(AppTheme.sectionLabel("Upcoming Holidays"), BorderLayout.NORTH);
+        holidayCard.add(AppTheme.sectionLabel("Cultural Holidays & Festivals"), BorderLayout.NORTH);
         
-        holidayInfoArea.setBorder(BorderFactory.createEmptyBorder());
-        JScrollPane holidayScrollPane = new JScrollPane(holidayInfoArea);
+        JScrollPane holidayScrollPane = new JScrollPane(holidayListPanel);
         holidayScrollPane.setBorder(null);
+        holidayScrollPane.getVerticalScrollBar().setUnitIncrement(16);
         holidayCard.add(holidayScrollPane, BorderLayout.CENTER);
         
         // Card 3: Converter
@@ -203,44 +201,63 @@ public class CalendarView extends JFrame {
     }
     
     private void updateHolidayInfo() {
-        StringBuilder info = new StringBuilder();
-        info.append("Major Ethiopian Holidays and Festivals:\n\n");
+        holidayListPanel.removeAll();
         
-        info.append("- Enkutatash (Ethiopian New Year)\n");
-        info.append("  - September 11 (or 12 in leap years)\n");
-        info.append("  - Celebrates the beginning of the Ethiopian year\n\n");
+        addHolidayItem("Enkutatash", "Ethiopian New Year", "September 11/12", "Yellow flowers (Adey Abeba) and family feasts.");
+        addHolidayItem("Meskel", "Finding of the True Cross", "September 27/28", "Huge bonfires (Demera) and traditional singing.");
+        addHolidayItem("Timkat", "Epiphany", "January 19/20", "Model Arks (Tabots) processing to water bodies.");
+        addHolidayItem("Genna", "Ethiopian Christmas", "January 7", "Traditional hockey-like game (Yegenna Chewata).");
+        addHolidayItem("Fasika", "Ethiopian Easter", "Variable (April/May)", "End of 55-day fast; major celebration with Doro Wat.");
+        addHolidayItem("Irreecha", "Oromo Thanksgiving", "Early October", "Celebration at Lake Hora near Bishoftu.");
+        addHolidayItem("Kulubi Gabriel", "Saint Gabriel Festival", "December 28", "Massive pilgrimage to the Kulubi church.");
         
-        info.append("- Meskel (Finding of the True Cross)\n");
-        info.append("  - September 27\n");
-        info.append("  - Major religious festival with bonfire ceremonies\n\n");
+        holidayListPanel.revalidate();
+        holidayListPanel.repaint();
+    }
+    
+    private void addHolidayItem(String name, String type, String date, String description) {
+        JPanel item = new JPanel(new BorderLayout(10, 5));
+        item.setBackground(AppTheme.CARD_BG);
+        item.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, AppTheme.BORDER),
+            BorderFactory.createEmptyBorder(10, 5, 10, 5)
+        ));
+        item.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
         
-        info.append("- Timkat (Epiphany)\n");
-        info.append("  - January 19\n");
-        info.append("  - Commemorates the baptism of Jesus\n\n");
+        JLabel nameLabel = new JLabel(name);
+        nameLabel.setFont(AppTheme.BODY_FONT.deriveFont(Font.BOLD));
+        nameLabel.setForeground(AppTheme.PRIMARY);
         
-        info.append("- Mawlid (Prophet Muhammad's Birthday)\n");
-        info.append("  - Variable date (usually September)\n");
-        info.append("  - Important Islamic celebration\n\n");
+        JLabel dateLabel = new JLabel(date);
+        dateLabel.setFont(AppTheme.SMALL_FONT);
+        dateLabel.setForeground(AppTheme.ACCENT);
         
-        info.append("- Ethiopian Christmas (Genna)\n");
-        info.append("  - January 7\n");
-        info.append("  - Celebrated according to the Julian calendar\n\n");
+        JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
+        header.add(nameLabel, BorderLayout.WEST);
+        header.add(dateLabel, BorderLayout.EAST);
         
-        info.append("- Ethiopian Easter (Fasika)\n");
-        info.append("  - Variable date (usually April/May)\n");
-        info.append("  - Most important religious holiday\n\n");
+        JLabel typeLabel = new JLabel(type);
+        typeLabel.setFont(AppTheme.SMALL_FONT.deriveFont(Font.ITALIC));
+        typeLabel.setForeground(AppTheme.MUTED_TEXT);
         
-        info.append("Peak Tourist Seasons:\n");
-        info.append("- September - November: Post-rainy season, pleasant weather\n");
-        info.append("- January - March: Dry season, ideal for travel\n");
-        info.append("- During major festivals: Increased tourism activity\n\n");
+        JTextArea descArea = new JTextArea(description);
+        descArea.setEditable(false);
+        descArea.setLineWrap(true);
+        descArea.setWrapStyleWord(true);
+        descArea.setBackground(AppTheme.CARD_BG);
+        descArea.setFont(AppTheme.SMALL_FONT);
+        descArea.setForeground(AppTheme.TEXT);
         
-        info.append("Note: Ethiopian calendar is 7-8 years behind the Gregorian calendar");
-        info.append(" and consists of 12 months of 30 days each, plus a 13th month");
-        info.append(" of 5 or 6 days.");
+        JPanel content = new JPanel(new BorderLayout(0, 2));
+        content.setOpaque(false);
+        content.add(typeLabel, BorderLayout.NORTH);
+        content.add(descArea, BorderLayout.CENTER);
         
-        holidayInfoArea.setText(info.toString());
-        holidayInfoArea.setCaretPosition(0);
+        item.add(header, BorderLayout.NORTH);
+        item.add(content, BorderLayout.CENTER);
+        
+        holidayListPanel.add(item);
     }
     
     private void convertDate() {
