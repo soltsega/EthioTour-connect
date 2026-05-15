@@ -6,10 +6,10 @@ import com.ethiotour.util.EthiopianCalendar;
 import java.time.LocalDate;
 
 public class BookingService {
-    private DatabaseService dbService;
+    private IDatabaseService dbService;
     
     public BookingService() {
-        this.dbService = DatabaseService.getInstance();
+        this.dbService = DatabaseServiceFactory.getDatabaseService();
     }
     
     public BookingValidationResult validateBooking(int tourId, int participantsCount, boolean isResident) {

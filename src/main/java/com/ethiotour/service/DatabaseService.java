@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class DatabaseService {
+public class DatabaseService implements IDatabaseService {
     // In-memory database simulation for MVP
     private static DatabaseService instance;
     
