@@ -20,6 +20,8 @@ public class CalendarView extends JFrame {
     private JTextField gregorianInputField;
     private JTextField ethiopianInputField;
     private JLabel conversionResultLabel;
+    private JPanel calendarGridPanel;
+    private JLabel currentMonthLabel;
     
     public CalendarView(MainController controller) {
         this.controller = controller;
@@ -146,19 +148,42 @@ public class CalendarView extends JFrame {
         gbcConv.gridy = 4;
         convertCard.add(conversionResultLabel, gbcConv);
         
+        // Card 4: Monthly Overview
+        JPanel gridCard = new JPanel(new BorderLayout(0, 10));
+        AppTheme.styleCard(gridCard);
+        
+        currentMonthLabel = new JLabel("", SwingConstants.CENTER);
+        currentMonthLabel.setFont(AppTheme.SECTION_FONT);
+        gridCard.add(currentMonthLabel, BorderLayout.NORTH);
+        
+        calendarGridPanel = new JPanel(new GridLayout(0, 7, 2, 2));
+        calendarGridPanel.setBackground(AppTheme.SURFACE);
+        gridCard.add(calendarGridPanel, BorderLayout.CENTER);
+        
+        // Use a wrapper to keep grid responsive
+        JPanel gridWrapper = new JPanel(new BorderLayout());
+        gridWrapper.setBackground(AppTheme.BACKGROUND);
+        gridWrapper.setBorder(BorderFactory.createEmptyBorder(0, 30, 0, 30));
+        gridWrapper.add(gridCard, BorderLayout.CENTER);
+
         dashboard.add(todayCard);
         dashboard.add(holidayCard);
         dashboard.add(convertCard);
         
-        // Bottom Navigation
+        // Bottom Navigation and Grid
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBackground(AppTheme.BACKGROUND);
+        bottomPanel.add(gridWrapper, BorderLayout.CENTER);
+        
         JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         navPanel.setBackground(AppTheme.BACKGROUND);
-        navPanel.setBorder(BorderFactory.createEmptyBorder(0, 30, 20, 30));
+        navPanel.setBorder(BorderFactory.createEmptyBorder(10, 30, 20, 30));
         navPanel.add(backButton);
+        bottomPanel.add(navPanel, BorderLayout.SOUTH);
         
         add(header, BorderLayout.NORTH);
         add(dashboard, BorderLayout.CENTER);
-        add(navPanel, BorderLayout.SOUTH);
+        add(bottomPanel, BorderLayout.SOUTH);
     }
     
     private void setupEventHandlers() {
@@ -198,18 +223,64 @@ public class CalendarView extends JFrame {
         
         // Update holiday information
         updateHolidayInfo();
+        
+        // Update monthly grid
+        updateMonthlyGrid(today);
+    }
+    
+    private void updateMonthlyGrid(LocalDate date) {
+        calendarGridPanel.removeAll();
+        currentMonthLabel.setText(date.getMonth().toString() + " " + date.getYear());
+        
+        String[] days = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+        for (String day : days) {
+            JLabel label = new JLabel(day, SwingConstants.CENTER);
+            label.setFont(AppTheme.SMALL_FONT.deriveFont(Font.BOLD));
+            label.setForeground(AppTheme.PRIMARY);
+            calendarGridPanel.add(label);
+        }
+        
+        LocalDate firstOfMonth = date.withDayOfMonth(1);
+        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue();
+        
+        for (int i = 1; i < dayOfWeek; i++) {
+            calendarGridPanel.add(new JLabel(""));
+        }
+        
+        int daysInMonth = date.lengthOfMonth();
+        for (int i = 1; i <= daysInMonth; i++) {
+            JLabel label = new JLabel(String.valueOf(i), SwingConstants.CENTER);
+            label.setFont(AppTheme.BODY_FONT);
+            if (i == date.getDayOfMonth()) {
+                label.setOpaque(true);
+                label.setBackground(AppTheme.PRIMARY);
+                label.setForeground(Color.WHITE);
+            }
+            calendarGridPanel.add(label);
+        }
+        
+        calendarGridPanel.revalidate();
+        calendarGridPanel.repaint();
     }
     
     private void updateHolidayInfo() {
         holidayListPanel.removeAll();
         
-        addHolidayItem("Enkutatash", "Ethiopian New Year", "September 11/12", "Yellow flowers (Adey Abeba) and family feasts.");
-        addHolidayItem("Meskel", "Finding of the True Cross", "September 27/28", "Huge bonfires (Demera) and traditional singing.");
-        addHolidayItem("Timkat", "Epiphany", "January 19/20", "Model Arks (Tabots) processing to water bodies.");
-        addHolidayItem("Genna", "Ethiopian Christmas", "January 7", "Traditional hockey-like game (Yegenna Chewata).");
-        addHolidayItem("Fasika", "Ethiopian Easter", "Variable (April/May)", "End of 55-day fast; major celebration with Doro Wat.");
-        addHolidayItem("Irreecha", "Oromo Thanksgiving", "Early October", "Celebration at Lake Hora near Bishoftu.");
-        addHolidayItem("Kulubi Gabriel", "Saint Gabriel Festival", "December 28", "Massive pilgrimage to the Kulubi church.");
+        // UNESCO Intangible Cultural Heritage
+        addHolidayItem("Timkat (Epiphany)", "UNESCO Intangible Heritage", "January 19/20", "Most colorful festival commemorating Jesus' baptism. Large processions with Tabots.");
+        addHolidayItem("Meskel", "UNESCO Intangible Heritage", "September 27/28", "Finding of the True Cross. Features the Demera bonfire ceremony.");
+        addHolidayItem("Fichee-Chambalaalla", "UNESCO Intangible Heritage", "Variable (June/July)", "The New Year festival of the Sidama people. Celebrates nature and culture.");
+        addHolidayItem("Shuwal Eid", "UNESCO Intangible Heritage", "Variable", "A six-day festival celebrated by the Harari people after Ramadan.");
+        addHolidayItem("Gada System", "UNESCO Intangible Heritage", "Continuous", "The traditional democratic socio-political system of the Oromo people.");
+        
+        // National & Regional Festivals
+        addHolidayItem("Ashenda / Ashendye", "National Cultural Festival", "August 21-25", "Unique girls' festival in Tigray and Amhara regions with traditional dressing.");
+        addHolidayItem("Enkutatash", "National Holiday", "September 11/12", "Ethiopian New Year. Marked by yellow flowers and family gatherings.");
+        addHolidayItem("Genna", "National Holiday", "January 7", "Ethiopian Christmas. Famous for the Yegenna Chewata (traditional hockey) game.");
+        addHolidayItem("Fasika", "National Holiday", "Variable", "Ethiopian Easter. A major religious event following a 55-day fast.");
+        addHolidayItem("Buhe", "Cultural Festival", "August 19", "Boys go from house to house singing songs and cracking whips.");
+        addHolidayItem("Irreecha", "Cultural Festival", "Early October", "Oromo Thanksgiving festival celebrated at Lake Hora, Bishoftu.");
+        addHolidayItem("Dire Sheikh Hussein", "Regional Pilgrimage", "Variable", "One of the most important Islamic pilgrimage sites in Ethiopia (Bale).");
         
         holidayListPanel.revalidate();
         holidayListPanel.repaint();
