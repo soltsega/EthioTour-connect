@@ -49,8 +49,7 @@ public class BookingsView extends JFrame {
     private void initializeComponents() {
         setTitle("Manage Bookings - EthioTour Connect");
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        setSize(1100, 700);
-        setLocationRelativeTo(null);
+        AppTheme.styleWindow(this);
         getContentPane().setBackground(AppTheme.BACKGROUND);
         
         // Table setup

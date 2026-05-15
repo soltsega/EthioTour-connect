@@ -38,9 +38,7 @@ public class MainView extends JFrame {
     private void initializeComponents() {
         setTitle("EthioTour Connect - Tourism Management System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(900, 620));
-        setSize(980, 680);
-        setLocationRelativeTo(null);
+        AppTheme.styleWindow(this);
 
         mainPanel = new JPanel();
         mainPanel.setBackground(AppTheme.BACKGROUND);

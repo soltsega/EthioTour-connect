@@ -32,8 +32,7 @@ public class CalendarView extends JFrame {
     private void initializeComponents() {
         setTitle("Ethiopian Calendar - EthioTour Connect");
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        setSize(700, 500);
-        setLocationRelativeTo(null);
+        AppTheme.styleWindow(this);
         getContentPane().setBackground(AppTheme.BACKGROUND);
         
         // Current date labels
@@ -76,56 +75,92 @@ public class CalendarView extends JFrame {
     private void setupLayout() {
         setLayout(new BorderLayout());
         
-        // Top panel with current dates
-        JPanel topPanel = new JPanel(new GridLayout(4, 1, 5, 5));
-        topPanel.setBackground(AppTheme.SURFACE);
-        topPanel.setBorder(AppTheme.panelBorder("Current Date Information"));
-        topPanel.add(gregorianDateLabel);
-        topPanel.add(ethiopianDateLabel);
-        topPanel.add(holidayLabel);
-        topPanel.add(seasonLabel);
+        // Header
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(AppTheme.PRIMARY);
+        header.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         
-        // Center panel with holiday info
+        JLabel titleLabel = new JLabel("Ethiopian Calendar & Cultural Guide");
+        titleLabel.setFont(AppTheme.TITLE_FONT.deriveFont(24f));
+        titleLabel.setForeground(Color.WHITE);
+        header.add(titleLabel, BorderLayout.WEST);
+        
+        // Dashboard
+        JPanel dashboard = new JPanel(new GridLayout(1, 3, 20, 0));
+        dashboard.setBackground(AppTheme.BACKGROUND);
+        dashboard.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        
+        // Card 1: Today
+        JPanel todayCard = new JPanel(new GridBagLayout());
+        AppTheme.styleCard(todayCard);
+        GridBagConstraints gbcToday = new GridBagConstraints();
+        gbcToday.gridx = 0; gbcToday.gridy = 0; gbcToday.insets = new Insets(5, 5, 5, 5);
+        
+        JLabel todayTitle = AppTheme.sectionLabel("Today's Date");
+        todayCard.add(todayTitle, gbcToday);
+        
+        gbcToday.gridy = 1;
+        todayCard.add(gregorianDateLabel, gbcToday);
+        
+        gbcToday.gridy = 2;
+        ethiopianDateLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        todayCard.add(ethiopianDateLabel, gbcToday);
+        
+        gbcToday.gridy = 3;
+        todayCard.add(holidayLabel, gbcToday);
+        
+        gbcToday.gridy = 4;
+        todayCard.add(seasonLabel, gbcToday);
+        
+        // Card 2: Holidays
+        JPanel holidayCard = new JPanel(new BorderLayout(0, 10));
+        AppTheme.styleCard(holidayCard);
+        holidayCard.add(AppTheme.sectionLabel("Upcoming Holidays"), BorderLayout.NORTH);
+        
+        holidayInfoArea.setBorder(BorderFactory.createEmptyBorder());
         JScrollPane holidayScrollPane = new JScrollPane(holidayInfoArea);
-        holidayScrollPane.setBorder(AppTheme.panelBorder("Ethiopian Holidays & Festivals"));
+        holidayScrollPane.setBorder(null);
+        holidayCard.add(holidayScrollPane, BorderLayout.CENTER);
         
-        // Bottom panel with conversion tools
-        JPanel conversionPanel = new JPanel(new GridBagLayout());
-        conversionPanel.setBackground(AppTheme.SURFACE);
-        conversionPanel.setBorder(AppTheme.panelBorder("Date Conversion"));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        // Card 3: Converter
+        JPanel convertCard = new JPanel(new GridBagLayout());
+        AppTheme.styleCard(convertCard);
+        GridBagConstraints gbcConv = new GridBagConstraints();
+        gbcConv.insets = new Insets(10, 5, 10, 5);
+        gbcConv.fill = GridBagConstraints.HORIZONTAL;
         
-        gbc.gridx = 0; gbc.gridy = 0;
-        conversionPanel.add(new JLabel("Gregorian (YYYY-MM-DD):"), gbc);
-        gbc.gridx = 1;
-        conversionPanel.add(gregorianInputField, gbc);
+        gbcConv.gridx = 0; gbcConv.gridy = 0; gbcConv.gridwidth = 2;
+        convertCard.add(AppTheme.sectionLabel("Date Converter"), gbcConv);
         
-        gbc.gridx = 0; gbc.gridy = 1;
-        conversionPanel.add(new JLabel("Ethiopian (YYYY-MM-DD):"), gbc);
-        gbc.gridx = 1;
-        conversionPanel.add(ethiopianInputField, gbc);
+        gbcConv.gridy = 1; gbcConv.gridwidth = 1;
+        convertCard.add(new JLabel("Gregorian:"), gbcConv);
+        gbcConv.gridx = 1;
+        convertCard.add(gregorianInputField, gbcConv);
         
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
-        conversionPanel.add(convertButton, gbc);
+        gbcConv.gridx = 0; gbcConv.gridy = 2;
+        convertCard.add(new JLabel("Ethiopian:"), gbcConv);
+        gbcConv.gridx = 1;
+        convertCard.add(ethiopianInputField, gbcConv);
         
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
-        conversionPanel.add(conversionResultLabel, gbc);
+        gbcConv.gridx = 0; gbcConv.gridy = 3; gbcConv.gridwidth = 2;
+        convertCard.add(convertButton, gbcConv);
         
-        // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        buttonPanel.setBackground(AppTheme.BACKGROUND);
-        buttonPanel.add(backButton);
+        gbcConv.gridy = 4;
+        convertCard.add(conversionResultLabel, gbcConv);
         
-        // Main container
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.setBackground(AppTheme.BACKGROUND);
-        mainPanel.add(topPanel, BorderLayout.NORTH);
-        mainPanel.add(holidayScrollPane, BorderLayout.CENTER);
-        mainPanel.add(conversionPanel, BorderLayout.SOUTH);
+        dashboard.add(todayCard);
+        dashboard.add(holidayCard);
+        dashboard.add(convertCard);
         
-        add(mainPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        // Bottom Navigation
+        JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        navPanel.setBackground(AppTheme.BACKGROUND);
+        navPanel.setBorder(BorderFactory.createEmptyBorder(0, 30, 20, 30));
+        navPanel.add(backButton);
+        
+        add(header, BorderLayout.NORTH);
+        add(dashboard, BorderLayout.CENTER);
+        add(navPanel, BorderLayout.SOUTH);
     }
     
     private void setupEventHandlers() {

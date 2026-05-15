@@ -12,13 +12,16 @@ final class AppTheme {
     static final Color SURFACE = Color.WHITE;
     static final Color TEXT = new Color(15, 23, 42);
     static final Color MUTED_TEXT = new Color(100, 116, 139);
-    static final Color PRIMARY = new Color(15, 118, 110); // Teal 700
-    static final Color PRIMARY_DARK = new Color(13, 148, 136); // Teal 600
-    static final Color PRIMARY_SOFT = new Color(204, 251, 241); // Teal 100
-    static final Color ACCENT = new Color(217, 119, 6); // Amber 600
+    static final Color PRIMARY = new Color(5, 150, 105); // Emerald 600
+    static final Color PRIMARY_DARK = new Color(4, 120, 87); // Emerald 700
+    static final Color PRIMARY_SOFT = new Color(209, 250, 229); // Emerald 100
+    static final Color ACCENT = new Color(245, 158, 11); // Amber 500
     static final Color BORDER = new Color(226, 232, 240); // Slate 200
     static final Color STRONG_BORDER = new Color(203, 213, 225); // Slate 300
     static final Color DANGER = new Color(225, 29, 72); // Rose 600
+    static final Color SUCCESS = new Color(16, 185, 129); // Emerald 500
+    static final Color CARD_BG = Color.WHITE;
+    static final Color SHADOW = new Color(0, 0, 0, 20);
 
     static final Font TITLE_FONT = new Font("Inter", Font.BOLD, 32);
     static final Font SECTION_FONT = new Font("Inter", Font.BOLD, 18);
@@ -109,6 +112,23 @@ final class AppTheme {
             BorderFactory.createTitledBorder(BorderFactory.createLineBorder(STRONG_BORDER), title),
             BorderFactory.createEmptyBorder(8, 10, 10, 10)
         );
+    }
+
+    static void styleWindow(JFrame frame) {
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setLocationRelativeTo(null);
+    }
+
+    static Border cardBorder() {
+        return BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER, 1, true),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        );
+    }
+
+    static void styleCard(JPanel panel) {
+        panel.setBackground(CARD_BG);
+        panel.setBorder(cardBorder());
     }
 
     private static Border spacedBorder(Color lineColor, int vertical, int horizontal) {

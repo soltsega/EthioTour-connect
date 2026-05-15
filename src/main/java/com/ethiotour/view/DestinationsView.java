@@ -41,8 +41,7 @@ public class DestinationsView extends JFrame {
     private void initializeComponents() {
         setTitle("Manage Destinations - EthioTour Connect");
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        setSize(900, 600);
-        setLocationRelativeTo(null);
+        AppTheme.styleWindow(this);
         getContentPane().setBackground(AppTheme.BACKGROUND);
         
         // Table setup
