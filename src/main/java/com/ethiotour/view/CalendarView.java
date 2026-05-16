@@ -103,7 +103,7 @@ public class CalendarView extends JFrame {
         todayCard.add(gregorianDateLabel, gbcToday);
         
         gbcToday.gridy = 2;
-        ethiopianDateLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        ethiopianDateLabel.setFont(AppTheme.TITLE_FONT.deriveFont(20f));
         todayCard.add(ethiopianDateLabel, gbcToday);
         
         gbcToday.gridy = 3;
@@ -274,13 +274,28 @@ public class CalendarView extends JFrame {
         addHolidayItem("Gada System", "UNESCO Intangible Heritage", "Continuous", "The traditional democratic socio-political system of the Oromo people.");
         
         // National & Regional Festivals
-        addHolidayItem("Ashenda / Ashendye", "National Cultural Festival", "August 21-25", "Unique girls' festival in Tigray and Amhara regions with traditional dressing.");
-        addHolidayItem("Enkutatash", "National Holiday", "September 11/12", "Ethiopian New Year. Marked by yellow flowers and family gatherings.");
-        addHolidayItem("Genna", "National Holiday", "January 7", "Ethiopian Christmas. Famous for the Yegenna Chewata (traditional hockey) game.");
-        addHolidayItem("Fasika", "National Holiday", "Variable", "Ethiopian Easter. A major religious event following a 55-day fast.");
-        addHolidayItem("Buhe", "Cultural Festival", "August 19", "Boys go from house to house singing songs and cracking whips.");
-        addHolidayItem("Irreecha", "Cultural Festival", "Early October", "Oromo Thanksgiving festival celebrated at Lake Hora, Bishoftu.");
-        addHolidayItem("Dire Sheikh Hussein", "Regional Pilgrimage", "Variable", "One of the most important Islamic pilgrimage sites in Ethiopia (Bale).");
+        addHolidayItem("Ashenda / Ashendye", "National Cultural Festival", "August 21-25",
+                "Unique girls' festival in Tigray and Amhara regions with traditional dressing.");
+        addHolidayItem("Enkutatash", "National Holiday", "September 11/12",
+                "Ethiopian New Year. Marked by yellow flowers and family gatherings.");
+        addHolidayItem("Genna", "National Holiday", "January 7",
+                "Ethiopian Christmas. Famous for the Yegenna Chewata (traditional hockey) game.");
+        addHolidayItem("Fasika", "National Holiday", "Variable",
+                "Ethiopian Easter. A major religious event following a 55-day fast.");
+        addHolidayItem("Buhe", "Cultural Festival", "August 19",
+                "Boys go from house to house singing songs and cracking whips.");
+        addHolidayItem("Irreecha", "Cultural Festival", "Early October",
+                "Oromo Thanksgiving festival celebrated at Lake Hora, Bishoftu.");
+        addHolidayItem("Adwa Victory Day", "National Holiday", "March 2", 
+                "Commemorates the victory over Italian forces in 1896.");
+        addHolidayItem("Patriots' Victory Day", "National Holiday", "May 5",
+                "Commemorates the end of the Italian occupation in 1941.");
+        addHolidayItem("Eid al-Fitr", "Religious Holiday", "Variable",
+                "End of Ramadan fasting. Celebrated with prayers and feasts.");
+        addHolidayItem("Eid al-Adha", "Religious Holiday", "Variable",
+                "Feast of Sacrifice. Commemorates Ibrahim's willingness to sacrifice his son.");
+        addHolidayItem("Gidatena / Chambalalla", "Cultural Festival", "June/July",
+                "Sidama New Year festival celebrating unity and nature.");
         
         holidayListPanel.revalidate();
         holidayListPanel.repaint();
@@ -314,9 +329,11 @@ public class CalendarView extends JFrame {
         
         JTextArea descArea = new JTextArea(description);
         descArea.setEditable(false);
+        descArea.setFocusable(false); // Fix for cursor sensitivity
+        descArea.setOpaque(false);
         descArea.setLineWrap(true);
         descArea.setWrapStyleWord(true);
-        descArea.setBackground(AppTheme.CARD_BG);
+        descArea.setBackground(new Color(0,0,0,0));
         descArea.setFont(AppTheme.SMALL_FONT);
         descArea.setForeground(AppTheme.TEXT);
         

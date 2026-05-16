@@ -182,10 +182,43 @@ public class BookingsView extends JFrame {
         participantsField.addActionListener(e -> updatePrice());
         residentCheckBox.addActionListener(e -> updatePrice());
         participantsField.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { updatePrice(); }
-            public void removeUpdate(DocumentEvent e) { updatePrice(); }
-            public void changedUpdate(DocumentEvent e) { updatePrice(); }
+            public void insertUpdate(DocumentEvent e) { updatePrice(); validateForm(); }
+            public void removeUpdate(DocumentEvent e) { updatePrice(); validateForm(); }
+            public void changedUpdate(DocumentEvent e) { updatePrice(); validateForm(); }
         });
+
+        // Real-time validation
+        DocumentListener formValidator = new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { validateForm(); }
+            public void removeUpdate(DocumentEvent e) { validateForm(); }
+            public void changedUpdate(DocumentEvent e) { validateForm(); }
+        };
+        customerNameField.getDocument().addDocumentListener(formValidator);
+        customerEmailField.getDocument().addDocumentListener(formValidator);
+        customerPhoneField.getDocument().addDocumentListener(formValidator);
+    }
+
+    private void validateForm() {
+        String name = customerNameField.getText().trim();
+        String email = customerEmailField.getText().trim();
+        String phone = customerPhoneField.getText().trim();
+        String participants = participantsField.getText().trim();
+
+        boolean nameValid = name.length() >= 3;
+        boolean emailValid = email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
+        boolean phoneValid = phone.matches("^\\+?[0-9\\s\\-]{10,15}$");
+        boolean partsValid = false;
+        try {
+            int p = Integer.parseInt(participants);
+            partsValid = p > 0;
+        } catch (Exception e) {}
+
+        customerNameField.putClientProperty("JComponent.outline", nameValid ? null : "error");
+        customerEmailField.putClientProperty("JComponent.outline", emailValid ? null : "error");
+        customerPhoneField.putClientProperty("JComponent.outline", phoneValid ? null : "error");
+        participantsField.putClientProperty("JComponent.outline", partsValid ? null : "error");
+
+        createBookingButton.setEnabled(nameValid && emailValid && phoneValid && partsValid);
     }
     
     private void loadToursCombo() {
@@ -222,6 +255,7 @@ public class BookingsView extends JFrame {
     private void showNewBookingPanel() {
         loadToursCombo();
         clearNewBookingFields();
+        validateForm(); // Initial state check
         newBookingPanel.setVisible(true);
         customerNameField.requestFocus();
     }
@@ -277,6 +311,25 @@ public class BookingsView extends JFrame {
             if (customerName.isEmpty() || customerEmail.isEmpty() || 
                 customerPhone.isEmpty() || participantsText.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "All fields are required.", 
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Enhanced Validation
+            if (customerName.length() < 3) {
+                JOptionPane.showMessageDialog(this, "Name must be at least 3 characters long.", 
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!customerEmail.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid email address.", 
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!customerPhone.matches("^\\+?[0-9\\s\\-]{10,15}$")) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid phone number (10-15 digits).", 
                     "Validation Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
