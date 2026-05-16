@@ -58,7 +58,7 @@ public class MainView extends JFrame {
         summaryLabel.setForeground(new Color(229, 238, 233));
 
         ethiopianDateLabel = new JLabel("", SwingConstants.CENTER);
-        ethiopianDateLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        ethiopianDateLabel.setFont(AppTheme.BODY_FONT.deriveFont(Font.BOLD));
         ethiopianDateLabel.setForeground(Color.WHITE);
 
         gregorianDateLabel = new JLabel("", SwingConstants.CENTER);

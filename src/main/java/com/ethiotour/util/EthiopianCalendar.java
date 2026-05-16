@@ -46,9 +46,9 @@ public class EthiopianCalendar {
     public static String getEthiopianDateDisplay(LocalDate gregorianDate) {
         int[] ethiopianDate = convertToEthiopian(gregorianDate);
         String[] ethiopianMonths = {
-            "መስከረም", "ጥቅምት", "ህዳር", "ታህሳስ", 
-            "ጥር", "የካቲት", "መጋቢት", "ሚያዝያ", 
-            "ግንቦት", "ሰኔ", "ሃምሌ", "ነሃሴ"
+            "Meskerem", "Tekemt", "Hidar", "Tahsas", 
+            "Tir", "Yekatit", "Megabit", "Miyazya", 
+            "Ginbot", "Sene", "Hamle", "Nehase"
         };
         
         return ethiopianDate[2] + " " + ethiopianMonths[ethiopianDate[1] - 1] + " " + ethiopianDate[0];
