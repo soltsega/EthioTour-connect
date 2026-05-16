@@ -16,11 +16,11 @@ public class MainController {
     private ToursView toursView;
     private BookingsView bookingsView;
     private CalendarView calendarView;
-    
+
     public MainController(MainView mainView) {
         this.mainView = mainView;
     }
-    
+
     public void showDestinationsView() {
         if (destinationsView == null) {
             destinationsView = new DestinationsView(this);
@@ -28,7 +28,7 @@ public class MainController {
         mainView.setVisible(false);
         destinationsView.setVisible(true);
     }
-    
+
     public void showToursView() {
         if (toursView == null) {
             toursView = new ToursView(this);
@@ -36,7 +36,7 @@ public class MainController {
         mainView.setVisible(false);
         toursView.setVisible(true);
     }
-    
+
     public void showBookingsView() {
         if (bookingsView == null) {
             bookingsView = new BookingsView(this);
@@ -44,7 +44,7 @@ public class MainController {
         mainView.setVisible(false);
         bookingsView.setVisible(true);
     }
-    
+
     public void showCalendarView() {
         if (calendarView == null) {
             calendarView = new CalendarView(this);
@@ -52,27 +52,16 @@ public class MainController {
         mainView.setVisible(false);
         calendarView.setVisible(true);
     }
-    
+
     public void returnToMain() {
         mainView.setVisible(true);
-        if (destinationsView != null) destinationsView.setVisible(false);
-        if (toursView != null) toursView.setVisible(false);
-        if (bookingsView != null) bookingsView.setVisible(false);
-        if (calendarView != null) calendarView.setVisible(false);
-    }
-    
-    // This method is not being used currently but we can potentially use it in the future to add an exit button to the main view
-    public void exitApplication() {
-        int confirm = JOptionPane.showConfirmDialog(
-            mainView,
-            "Are you sure you want to exit EthioTour Connect?",
-            "Confirm Exit",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE
-        );
-        
-        if (confirm == JOptionPane.YES_OPTION) {
-            System.exit(0);
-        }
+        if (destinationsView != null)
+            destinationsView.setVisible(false);
+        if (toursView != null)
+            toursView.setVisible(false);
+        if (bookingsView != null)
+            bookingsView.setVisible(false);
+        if (calendarView != null)
+            calendarView.setVisible(false);
     }
 }
