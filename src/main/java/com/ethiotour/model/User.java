@@ -1,5 +1,13 @@
 package com.ethiotour.model;
 
+
+/**
+ * This file defines the User class, which represents a user in the system. Each user has an ID, username, email, phone number, role (admin, tour guide, or customer), active status, created date, and last login time. The class includes methods to manage user data and track login activity.
+ * We made all those prvate so that they can only be accessed through getter and setter methods, which allows us to control how the data is accessed and modified. This encapsulation helps maintain the integrity of the user data and allows us to add validation or additional logic in the future if needed.
+ * The UserRole enum defines the possible roles a user can have in the system, which helps
+ * Represents a user in the system, which can be an admin, tour guide, or customer.
+ * Contains fields for user information, role, and status, along with methods to manage user data and track login activity.
+ */
 import java.time.LocalDateTime;
 
 public class User {
@@ -16,6 +24,8 @@ public class User {
         ADMIN, TOUR_GUIDE, CUSTOMER
     }
     
+    // Default constructor initializes createdDate to now, active to true, and role to CUSTOMER. 
+    // This ensures that when a new User object is created without specific details, it starts with sensible default values for these fields, which are essential for user management and access control in the system.
     public User() {
         this.createdDate = LocalDateTime.now();
         this.active = true;

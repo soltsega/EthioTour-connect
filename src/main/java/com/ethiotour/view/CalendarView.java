@@ -1,11 +1,30 @@
 package com.ethiotour.view;
 
-import com.ethiotour.controller.MainController;
-import com.ethiotour.util.EthiopianCalendar;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+
+import com.ethiotour.controller.MainController;
+import com.ethiotour.util.EthiopianCalendar;
 
 public class CalendarView extends JFrame {
     private MainController controller;
@@ -23,6 +42,8 @@ public class CalendarView extends JFrame {
     private JPanel calendarGridPanel;
     private JLabel currentMonthLabel;
     
+    // Constructor
+    // It calls methods to initialize components, set up the layout, event handlers, and update calendar info on startup
     public CalendarView(MainController controller) {
         this.controller = controller;
         initializeComponents();

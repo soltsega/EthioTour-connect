@@ -1,8 +1,15 @@
 package com.ethiotour.model;
 
+/**
+ * This file defines the Tour class, which represents a tour in the system. 
+ * Each tour has an ID, name, description, destination, guide ID, start and end dates, maximum and current participants, resident and non-resident prices, status, and created date. The class includes methods to manage tour data and check availability.
+ * Each field is private to ensure encapsulation, allowing controlled access through getter and setter methods. This design helps maintain data integrity and allows for future enhancements, such as adding validation or additional logic when modifying tour data.
+ * The TourStatus enum defines the possible statuses a tour can have, which helps in managing the lifecycle of a tour (planned, active, completed, cancelled).
+ * Represents a tour in the system, containing all relevant information about the tour and methods to manage it.
+ */
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public class Tour {
     private int id;
@@ -23,6 +30,9 @@ public class Tour {
         PLANNED, ACTIVE, COMPLETED, CANCELLED
     }
     
+    // Constructor without parameters initializes createdDate to now, status to PLANNED, and currentParticipants to 0
+    // We did this to ensure that when a new Tour object is created without specific details, it starts with sensible default values for these fields, which are essential for the tour's lifecycle management and participant tracking.
+    // We will leave the other fields to be set through setters or a parameterized constructor, allowing for flexibility in how tours are created and managed in the system.
     public Tour() {
         this.createdDate = LocalDateTime.now();
         this.status = TourStatus.PLANNED;
@@ -94,8 +104,11 @@ public class Tour {
         return maxParticipants - currentParticipants;
     }
     
+    // We override the toString method to provide a meaningful string representation of the Tour object, which includes the tour name, destination name, and the start and end dates. This can be useful for debugging, logging, or displaying tour information in the UI.
+    // It will be used whenever we print a Tour object or concatenate it with a string, providing a clear and concise summary of the tour's key details.
     @Override
     public String toString() {
         return name + " - " + destination.getName() + " (" + startDate + " to " + endDate + ")";
+        // e.g., "Historic Ethiopia Tour - Addis Ababa (2024-10-01 to 2024-10-10)"
     }
 }

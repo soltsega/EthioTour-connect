@@ -1,14 +1,22 @@
 package com.ethiotour.service;
 
-import com.ethiotour.config.DatabaseConfig;
-import com.ethiotour.model.*;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
-import java.sql.*;
-import java.time.LocalDate;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.ethiotour.config.DatabaseConfig;
+import com.ethiotour.model.Booking;
+import com.ethiotour.model.Destination;
+import com.ethiotour.model.Tour;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 public class MSSQLDatabaseService implements IDatabaseService {
     private static MSSQLDatabaseService instance;
@@ -451,7 +459,6 @@ public class MSSQLDatabaseService implements IDatabaseService {
                     booking.setId(generatedKeys.getInt(1));
                 }
             }
-            
             // Update tour participants
             updateTourParticipants(booking.getTourId(), booking.getParticipantsCount());
         } catch (SQLException e) {

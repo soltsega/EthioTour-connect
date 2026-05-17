@@ -1,10 +1,22 @@
 package com.ethiotour.view;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatLightLaf;
-import javax.swing.*;
-import javax.swing.border.Border;
-import java.awt.*;
 
 final class AppTheme {
     static final Color BACKGROUND = new Color(248, 250, 252);
@@ -37,6 +49,8 @@ final class AppTheme {
                 BorderFactory.createLineBorder(BORDER, 1),
                 BorderFactory.createEmptyBorder(20, 24, 20, 24)));
     }
+
+    // constructor is private to prevent instantiation
 
     private AppTheme() {
     }
