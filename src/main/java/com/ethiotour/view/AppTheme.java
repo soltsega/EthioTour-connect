@@ -51,7 +51,7 @@ final class AppTheme {
     }
 
     // constructor is private to prevent instantiation
-
+    // This is intended to trigger a compile-time error if someone tries to create an instance of AppTheme, since it is meant to be a utility class with static methods and constants only.
     private AppTheme() {
     }
 
