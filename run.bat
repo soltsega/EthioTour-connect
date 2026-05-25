@@ -1,11 +1,14 @@
 @echo off  
-echo Compiling EthioTour Connect with SQLite Backend...
+echo Compiling EthioTour Connect...
 if not exist build\classes mkdir build\classes
 
 REM Download dependencies if lib folder doesn't exist
 if not exist lib mkdir lib
 REM lib is the directory where the dependencies are stored
-REM MS SQL download skipped (using SQLite by default)
+if not exist lib\mssql-jdbc-12.4.2.jre11.jar (
+    echo Downloading MS SQL JDBC...
+    powershell -Command "Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.4.2.jre11/mssql-jdbc-12.4.2.jre11.jar' -OutFile 'lib\mssql-jdbc-12.4.2.jre11.jar'"
+)
 if not exist lib\HikariCP-5.1.0.jar (
     echo Downloading HikariCP...
     @REM HikariCP is a database connection pool

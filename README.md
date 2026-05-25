@@ -24,15 +24,16 @@ mvn clean package
 java -jar target/ethiotour-connect-1.0-SNAPSHOT.jar
 ```
 
-### Option 2: Docker
-You can build and run the application in a container (requires X11 forwarding for the GUI).
+### Option 2: Docker Compose (Browser GUI)
+You can build and run the application alongside an MS SQL Server database using Docker Compose. The application will be accessible directly from your web browser, removing the need for any local GUI setup or X11 forwarding.
 
 ```bash
-# Build the image
-docker build -t ethiotour-connect .
+# Build and start the services in the background
+docker-compose up -d
 
-# Run the image (Linux/X11 example)
-docker run -it --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix ethiotour-connect
+# Access the application
+# Open your web browser and navigate to:
+http://localhost:5800
 ```
 
 ### Option 3: Standard Batch File

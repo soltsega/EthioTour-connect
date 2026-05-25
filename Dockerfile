@@ -2,16 +2,27 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY pom.xml .
+RUN mvn dependency:go-offline
+
 COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Run stage
-FROM eclipse-temurin:17-jre
+FROM jlesage/baseimage-gui:alpine-3.15-v4
+
+# Set environment variables for the GUI
+ENV APP_NAME="EthioTour Connect"
+ENV KEEP_APP_RUNNING=1
+
+# Install Java 17 and fonts
+RUN apk add --no-cache openjdk17-jre ttf-dejavu fontconfig
+
 WORKDIR /app
-COPY --from=build /app/target/ethiotour-connect-1.0-SNAPSHOT.jar app.jar
 
-# Note: Swing applications require an X11 server to run.
-# To run this container on Linux with X11 forwarding:
-# docker run -it --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix ethiotour-connect
+# Copy the built jar
+COPY --from=build /app/target/ethiotour-connect-1.0-SNAPSHOT.jar /app/app.jar
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Setup the application start script that baseimage-gui uses
+RUN echo "#!/bin/sh" > /startapp.sh && \
+    echo "exec java -jar /app/app.jar" >> /startapp.sh && \
+    chmod +x /startapp.sh

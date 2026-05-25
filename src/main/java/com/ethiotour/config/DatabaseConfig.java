@@ -16,7 +16,7 @@ public class DatabaseConfig {
         // Try multiple ways to find the config file
         String[] paths = { CONFIG_FILE, "resources/" + CONFIG_FILE, "/" + CONFIG_FILE };
         InputStream input = null;
-        
+
         for (String path : paths) {
             input = DatabaseConfig.class.getClassLoader().getResourceAsStream(path);
             if (input != null) {
@@ -53,10 +53,16 @@ public class DatabaseConfig {
     }
 
     public static String getProperty(String key) {
-        return properties.getProperty(key, "");
+        return getProperty(key, "");
     }
 
     public static String getProperty(String key, String defaultValue) {
+        // Try to read from environment variables first (e.g. DB_MSSQL_SERVER)
+        String envKey = key.toUpperCase().replace('.', '_');
+        String envProp = System.getenv(envKey);
+        if (envProp != null && !envProp.trim().isEmpty()) {
+            return envProp;
+        }
         return properties.getProperty(key, defaultValue);
     }
 

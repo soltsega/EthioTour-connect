@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5800:5800"
+    environment:
+      # GUI Settings
+      - APP_NAME=EthioTour Connect
+      # Database Connection Strings override
+      - DB_MODE=MSSQL
+      - DB_MSSQL_SERVER=db
+      - DB_MSSQL_PORT=1433
+      - DB_MSSQL_DATABASE=EthioTourDB
+      - DB_MSSQL_USERNAME=sa
+      - DB_MSSQL_PASSWORD=13579.,ad
+      - DB_MSSQL_TRUSTSERVERCERTIFICATE=true
+    volumes:
+      # Optional: Mount the internal sqlite database to persist local files if using SQLite mode
+      - app-data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=StrongPassw0rd!
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'StrongPassw0rd!' -Q 'SELECT 1' || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  mssql-data:
+  app-data:
