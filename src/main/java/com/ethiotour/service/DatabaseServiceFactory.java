@@ -18,12 +18,12 @@ public class DatabaseServiceFactory {
         System.out.println("Initializing database service: " + mode.getDisplayName());
         
         switch (mode) {
-            case MSSQL:
+            case POSTGRESQL:
                 try {
-                    instance = MSSQLDatabaseService.getInstance();
-                    System.out.println("[OK] MS SQL Server database service initialized");
+                    instance = PostgreSQLDatabaseService.getInstance();
+                    System.out.println("[OK] PostgreSQL database service initialized");
                 } catch (Exception e) {
-                    System.err.println("[ERROR] Failed to initialize MS SQL Server, falling back to SQLITE: " + e.getMessage());
+                    System.err.println("[ERROR] Failed to initialize PostgreSQL, falling back to SQLITE: " + e.getMessage());
                     instance = createSQLiteService();
                 }
                 break;

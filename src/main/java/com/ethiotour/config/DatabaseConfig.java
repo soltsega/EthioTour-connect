@@ -42,12 +42,10 @@ public class DatabaseConfig {
     }
 
     private static void setDefaults() {
-        properties.setProperty("db.mode", "IN_MEMORY");
-        properties.setProperty("db.mssql.server", "localhost");
-        properties.setProperty("db.mssql.port", "1433");
-        properties.setProperty("db.mssql.database", "EthioTourDB");
-        properties.setProperty("db.mssql.username", "sa");
-        properties.setProperty("db.mssql.password", "");
+        properties.setProperty("db.mode", "POSTGRESQL");
+        properties.setProperty("db.postgresql.url", "jdbc:postgresql://localhost:5432/swing_app_db");
+        properties.setProperty("db.postgresql.username", "postgres");
+        properties.setProperty("db.postgresql.password", "13579.,ad");
         properties.setProperty("db.pool.initialSize", "5");
         properties.setProperty("db.pool.maxSize", "20");
     }
@@ -57,7 +55,7 @@ public class DatabaseConfig {
     }
 
     public static String getProperty(String key, String defaultValue) {
-        // Try to read from environment variables first (e.g. DB_MSSQL_SERVER)
+        // Try to read from environment variables first (e.g. DB_POSTGRESQL_URL)
         String envKey = key.toUpperCase().replace('.', '_');
         String envProp = System.getenv(envKey);
         if (envProp != null && !envProp.trim().isEmpty()) {
@@ -68,48 +66,28 @@ public class DatabaseConfig {
 
     public static int getIntProperty(String key, int defaultValue) {
         try {
-            return Integer.parseInt(properties.getProperty(key, String.valueOf(defaultValue)));
+            return Integer.parseInt(getProperty(key, String.valueOf(defaultValue)));
         } catch (NumberFormatException e) {
             return defaultValue;
         }
     }
 
     public static boolean getBooleanProperty(String key, boolean defaultValue) {
-        String value = properties.getProperty(key, String.valueOf(defaultValue));
+        String value = getProperty(key, String.valueOf(defaultValue));
         return Boolean.parseBoolean(value);
     }
 
-    // MSSQL Configuration Getters
-    public static String getMSSQLServer() {
-        return getProperty("db.mssql.server", "localhost");
+    // PostgreSQL Configuration Getters
+    public static String getPostgreSQLUrl() {
+        return getProperty("db.postgresql.url", "jdbc:postgresql://localhost:5432/swing_app_db");
     }
 
-    public static int getMSSQLPort() {
-        return getIntProperty("db.mssql.port", 1433);
+    public static String getPostgreSQLUsername() {
+        return getProperty("db.postgresql.username", "postgres");
     }
 
-    public static String getMSSQLDatabase() {
-        return getProperty("db.mssql.database", "EthioTourDB");
-    }
-
-    public static String getMSSQLUsername() {
-        return getProperty("db.mssql.username", "sa");
-    }
-
-    public static String getMSSQLPassword() {
-        return getProperty("db.mssql.password", "");
-    }
-
-    public static boolean getMSSQLEncrypt() {
-        return getBooleanProperty("db.mssql.encrypt", false);
-    }
-
-    public static boolean getMSSQLTrustServerCertificate() {
-        return getBooleanProperty("db.mssql.trustServerCertificate", true);
-    }
-
-    public static int getMSSQLLoginTimeout() {
-        return getIntProperty("db.mssql.loginTimeout", 30);
+    public static String getPostgreSQLPassword() {
+        return getProperty("db.postgresql.password", "13579.,ad");
     }
 
     // Connection Pool Configuration Getters
@@ -142,6 +120,31 @@ public class DatabaseConfig {
         return getProperty("api.key", "");
     }
 
+    // Chapa Payment Configuration Getters
+    public static String getChapaSecretKey() {
+        return getProperty("payment.chapa.secretKey", "");
+    }
+
+    public static String getChapaInitializeUrl() {
+        return getProperty("payment.chapa.initializeUrl", "https://api.chapa.co/v1/transaction/initialize");
+    }
+
+    public static String getChapaVerifyUrl() {
+        return getProperty("payment.chapa.verifyUrl", "https://api.chapa.co/v1/transaction/verify");
+    }
+
+    public static String getChapaReturnUrl() {
+        return getProperty("payment.chapa.returnUrl", "https://chapa.co/");
+    }
+
+    public static String getChapaCurrency() {
+        return getProperty("payment.chapa.currency", "ETB");
+    }
+
+    public static String getChapaTitle() {
+        return getProperty("payment.chapa.title", "EthioTour");
+    }
+
     // SQLite Configuration Getters
     public static String getSQLitePath() {
         return getProperty("db.sqlite.path", "ethiotour.db");
@@ -160,7 +163,7 @@ public class DatabaseConfig {
 
     public enum DatabaseMode {
         IN_MEMORY("In-Memory Simulation"),
-        MSSQL("MS SQL Server"),
+        POSTGRESQL("PostgreSQL"),
         SQLITE("SQLite (Local File)");
 
         private final String displayName;
@@ -178,9 +181,9 @@ public class DatabaseConfig {
     public static void printConfiguration() {
         System.out.println("\n=== EthioTour Database Configuration ===");
         System.out.println("Mode: " + getDatabaseMode().getDisplayName());
-        if (getDatabaseMode() == DatabaseMode.MSSQL) {
-            System.out.println("Server: " + getMSSQLServer() + ":" + getMSSQLPort());
-            System.out.println("Database: " + getMSSQLDatabase());
+        if (getDatabaseMode() == DatabaseMode.POSTGRESQL) {
+            System.out.println("URL: " + getPostgreSQLUrl());
+            System.out.println("Username: " + getPostgreSQLUsername());
             System.out.println("Connection Pool Max Size: " + getPoolMaxSize());
         }
         System.out.println("API Base URL: " + getAPIBaseUrl());

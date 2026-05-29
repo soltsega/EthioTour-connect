@@ -4,7 +4,8 @@ import com.ethiotour.model.Booking;
 import com.ethiotour.model.Destination;
 import com.ethiotour.model.Tour;
 import com.ethiotour.service.BookingService;
-import com.ethiotour.service.DatabaseService;
+import com.ethiotour.service.DatabaseServiceFactory;
+import com.ethiotour.service.IDatabaseService;
 import com.ethiotour.util.EthiopianCalendar;
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +14,7 @@ public class DemoApp {
     public static void main(String[] args) {
         System.out.println("=== EthioTour Connect - MVP Demo ===\n");
 
-        DatabaseService dbService = DatabaseService.getInstance();
+        IDatabaseService dbService = DatabaseServiceFactory.getDatabaseService();
         BookingService bookingService = new BookingService();
 
         System.out.println("Ethiopian Calendar");

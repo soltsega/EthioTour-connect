@@ -7,9 +7,11 @@ import java.time.LocalDate;
 
 public class BookingService {
     private IDatabaseService dbService;
+    private ChapaPaymentService chapaPaymentService;
     
     public BookingService() {
         this.dbService = DatabaseServiceFactory.getDatabaseService();
+        this.chapaPaymentService = new ChapaPaymentService();
     }
     
     public BookingValidationResult validateBooking(int tourId, int participantsCount, boolean isResident) {
@@ -114,6 +116,46 @@ public class BookingService {
         dbService.updateBooking(booking);
         
         return true;
+    }
+
+    public ChapaPaymentResult startChapaCheckout(int bookingId) {
+        Booking booking = dbService.getBookingById(bookingId);
+        if (booking == null) {
+            return ChapaPaymentResult.failed("Booking not found.", null, null);
+        }
+
+        if (booking.getStatus() == Booking.BookingStatus.PAID) {
+            return ChapaPaymentResult.failed("Booking is already paid.", booking.getPaymentReference(), booking.getStatus().toString());
+        }
+
+        if (booking.getStatus() != Booking.BookingStatus.PENDING_CONFIRMATION
+            && booking.getStatus() != Booking.BookingStatus.CONFIRMED) {
+            return ChapaPaymentResult.failed("Only pending or confirmed bookings can start Chapa checkout.", booking.getPaymentReference(), booking.getStatus().toString());
+        }
+
+        ChapaPaymentResult result = chapaPaymentService.initializeCheckout(booking);
+        if (result.isSuccess()) {
+            booking.setPaymentMethod("Chapa");
+            booking.setPaymentReference(result.getTxRef());
+            booking.updateStatus(Booking.BookingStatus.CONFIRMED);
+            dbService.updateBooking(booking);
+        }
+        return result;
+    }
+
+    public ChapaPaymentResult verifyChapaPayment(int bookingId) {
+        Booking booking = dbService.getBookingById(bookingId);
+        if (booking == null) {
+            return ChapaPaymentResult.failed("Booking not found.", null, null);
+        }
+
+        ChapaPaymentResult result = chapaPaymentService.verifyPayment(booking.getPaymentReference());
+        if (result.isSuccess()) {
+            booking.setPaymentMethod("Chapa");
+            booking.updateStatus(Booking.BookingStatus.PAID);
+            dbService.updateBooking(booking);
+        }
+        return result;
     }
     
     public boolean cancelBooking(int bookingId) {

@@ -3,6 +3,7 @@ package com.ethiotour.view;
 import com.ethiotour.controller.MainController;
 import com.ethiotour.model.Booking;
 import com.ethiotour.model.Tour;
+import com.ethiotour.service.ChapaPaymentResult;
 import com.ethiotour.service.IDatabaseService;
 import com.ethiotour.service.DatabaseServiceFactory;
 import com.ethiotour.service.BookingService;
@@ -11,6 +12,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.net.URI;
 import java.util.List;
 
 public class BookingsView extends JFrame {
@@ -23,6 +25,7 @@ public class BookingsView extends JFrame {
     private JButton newBookingButton;
     private JButton confirmButton;
     private JButton processPaymentButton;
+    private JButton verifyPaymentButton;
     private JButton cancelButton;
     private JButton backButton;
     private JComboBox<Tour> tourCombo;
@@ -69,12 +72,14 @@ public class BookingsView extends JFrame {
         // Action buttons
         newBookingButton = new JButton("New Booking");
         confirmButton = new JButton("Confirm Selected");
-        processPaymentButton = new JButton("Process Payment");
+        processPaymentButton = new JButton("Pay with Chapa");
+        verifyPaymentButton = new JButton("Verify Chapa Payment");
         cancelButton = new JButton("Cancel Selected");
         backButton = new JButton("Back to Main");
         AppTheme.stylePrimaryButton(newBookingButton);
         AppTheme.styleSecondaryButton(confirmButton);
         AppTheme.styleSecondaryButton(processPaymentButton);
+        AppTheme.styleSecondaryButton(verifyPaymentButton);
         AppTheme.styleDangerButton(cancelButton);
         AppTheme.styleSecondaryButton(backButton);
         
@@ -108,6 +113,7 @@ public class BookingsView extends JFrame {
         buttonPanel.add(newBookingButton);
         buttonPanel.add(confirmButton);
         buttonPanel.add(processPaymentButton);
+        buttonPanel.add(verifyPaymentButton);
         buttonPanel.add(cancelButton);
         buttonPanel.add(Box.createHorizontalStrut(20));
         buttonPanel.add(backButton);
@@ -171,6 +177,7 @@ public class BookingsView extends JFrame {
         newBookingButton.addActionListener(e -> showNewBookingPanel());
         confirmButton.addActionListener(e -> confirmSelectedBooking());
         processPaymentButton.addActionListener(e -> processPaymentForSelected());
+        verifyPaymentButton.addActionListener(e -> verifyChapaPaymentForSelected());
         cancelButton.addActionListener(e -> cancelSelectedBooking());
         backButton.addActionListener(e -> controller.returnToMain());
         
@@ -417,28 +424,82 @@ public class BookingsView extends JFrame {
         int bookingId = (Integer) tableModel.getValueAt(selectedRow, 0);
         Booking booking = dbService.getBookingById(bookingId);
         
-        if (booking.getStatus() != Booking.BookingStatus.CONFIRMED) {
-            JOptionPane.showMessageDialog(this, "Only confirmed bookings can have payments processed.", 
+        if (booking.getStatus() != Booking.BookingStatus.PENDING_CONFIRMATION
+            && booking.getStatus() != Booking.BookingStatus.CONFIRMED) {
+            JOptionPane.showMessageDialog(this, "Only pending or confirmed bookings can start Chapa checkout.",
                 "Invalid Status", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
         int confirm = JOptionPane.showConfirmDialog(this, 
-            "Process payment for booking #" + bookingId + "?\nAmount: $" + 
+            "Open Chapa test checkout for booking #" + bookingId + "?\nAmount: " + 
             String.format("%.2f", booking.getTotalPrice()), 
-            "Confirm Payment Processing", JOptionPane.YES_NO_OPTION);
+            "Open Chapa Checkout", JOptionPane.YES_NO_OPTION);
         
         if (confirm == JOptionPane.YES_OPTION) {
-            boolean success = bookingService.processPayment(bookingId);
+            ChapaPaymentResult result = bookingService.startChapaCheckout(bookingId);
             
-            if (success) {
+            if (result.isSuccess()) {
                 loadBookings();
-                JOptionPane.showMessageDialog(this, "Payment processed successfully.", 
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
+                openCheckoutUrl(result.getCheckoutUrl());
+                JOptionPane.showMessageDialog(this, 
+                    "Chapa checkout opened.\nTransaction reference: " + result.getTxRef() +
+                    "\nAfter completing payment, select this booking and click Verify Chapa Payment.",
+                    "Chapa Checkout", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Failed to process payment.", 
+                JOptionPane.showMessageDialog(this, "Failed to start Chapa checkout:\n" + result.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    private void verifyChapaPaymentForSelected() {
+        int selectedRow = bookingsTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a booking to verify.", 
+                "No Selection", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int bookingId = (Integer) tableModel.getValueAt(selectedRow, 0);
+        Booking booking = dbService.getBookingById(bookingId);
+
+        if (booking.getPaymentReference() == null || booking.getPaymentReference().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "This booking does not have a Chapa transaction reference yet.",
+                "Missing Reference", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        ChapaPaymentResult result = bookingService.verifyChapaPayment(bookingId);
+        loadBookings();
+
+        if (result.isSuccess()) {
+            JOptionPane.showMessageDialog(this, "Chapa payment verified. Booking is now PAID.",
+                "Payment Verified", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "Chapa payment is not successful yet.\nStatus: " + 
+                    (result.getStatus() != null ? result.getStatus() : "unknown") +
+                    "\nMessage: " + result.getMessage(),
+                "Payment Not Verified", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void openCheckoutUrl(String checkoutUrl) {
+        if (checkoutUrl == null || checkoutUrl.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(URI.create(checkoutUrl));
+            } else {
+                JOptionPane.showMessageDialog(this, "Open this Chapa checkout URL:\n" + checkoutUrl,
+                    "Checkout URL", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Open this Chapa checkout URL:\n" + checkoutUrl,
+                "Checkout URL", JOptionPane.INFORMATION_MESSAGE);
         }
     }
     

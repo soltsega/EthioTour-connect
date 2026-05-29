@@ -25,7 +25,7 @@ java -jar target/ethiotour-connect-1.0-SNAPSHOT.jar
 ```
 
 ### Option 2: Docker Compose (Browser GUI)
-You can build and run the application alongside an MS SQL Server database using Docker Compose. The application will be accessible directly from your web browser, removing the need for any local GUI setup or X11 forwarding.
+You can build and run the application alongside a PostgreSQL database using Docker Compose. The application will be accessible directly from your web browser, removing the need for any local GUI setup or X11 forwarding.
 
 ```bash
 # Build and start the services in the background
@@ -96,7 +96,7 @@ The project includes a GitHub Actions workflow in `.github/workflows/build.yml` 
 | File | Purpose |
 | --- | --- |
 | `doc/project_description.md` | Original project idea and assignment description. This explains the business goal: Ethiopian tourism management with local calendar, pricing, and booking needs. |
-| `doc/database_setup.md` | Step-by-step SQL Server integration guide. Includes suggested tables, JDBC connection example, and transaction advice for bookings. |
+| `doc/database_setup.md` | Database integration notes. Includes suggested tables, JDBC connection example, and transaction advice for bookings. |
 
 ### Application Entry Points
 
@@ -124,7 +124,7 @@ The project includes a GitHub Actions workflow in `.github/workflows/build.yml` 
 
 | File | Purpose |
 | --- | --- |
-| `DatabaseService.java` | Temporary in-memory data store. Seeds sample destinations, tours, users, and holds lists of destinations, tours, bookings, and users. This is the main file to replace when connecting SQL Server. |
+| `DatabaseService.java` | Temporary in-memory data store. Seeds sample destinations, tours, users, and holds lists of destinations, tours, bookings, and users. |
 | `BookingService.java` | Business logic for bookings. Validates tour availability, calculates resident/non-resident price, creates bookings, confirms bookings, processes payment, and cancels bookings. |
 
 ### Utilities
@@ -147,16 +147,16 @@ The project includes a GitHub Actions workflow in `.github/workflows/build.yml` 
 ## Important Notes For The Team
 
 - The app currently stores data in memory. Data resets when the program restarts.
-- Use `DatabaseService.java` as the migration target when connecting SQL Server.
+- PostgreSQL is the default persistent database mode. SQLite and in-memory modes remain available for local demos.
 - Keep booking validation in `BookingService.java`; do not move business rules into Swing screens.
 - Booking creation should use a real database transaction before production use.
 - Ethiopian calendar conversion is simplified for prototype/demo purposes.
-- Payment processing is simulated. Chapa or Telebirr integration would require API calls, credentials, and callback handling.
+- Chapa test checkout is available from the bookings screen. Use `Pay with Chapa`, complete the hosted checkout, then use `Verify Chapa Payment` to mark successful transactions as paid.
 - The UI is desktop-only because it uses Java Swing.
 
 ## Database Integration
 
-For SQL Server integration steps, schema, and JDBC examples, see:
+For database integration notes, schema, and JDBC examples, see:
 
 ```text
 doc/database_setup.md

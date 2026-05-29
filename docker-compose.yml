@@ -9,13 +9,10 @@ services:
       # GUI Settings
       - APP_NAME=EthioTour Connect
       # Database Connection Strings override
-      - DB_MODE=MSSQL
-      - DB_MSSQL_SERVER=db
-      - DB_MSSQL_PORT=1433
-      - DB_MSSQL_DATABASE=EthioTourDB
-      - DB_MSSQL_USERNAME=sa
-      - DB_MSSQL_PASSWORD=13579.,ad
-      - DB_MSSQL_TRUSTSERVERCERTIFICATE=true
+      - DB_MODE=POSTGRESQL
+      - DB_POSTGRESQL_URL=jdbc:postgresql://db:5432/swing_app_db
+      - DB_POSTGRESQL_USERNAME=postgres
+      - DB_POSTGRESQL_PASSWORD=13579.,ad
     volumes:
       # Optional: Mount the internal sqlite database to persist local files if using SQLite mode
       - app-data:/app/data
@@ -24,21 +21,22 @@ services:
         condition: service_healthy
 
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: postgres:16-alpine
     ports:
-      - "1433:1433"
+      - "5432:5432"
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=StrongPassw0rd!
+      - POSTGRES_DB=swing_app_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=13579.,ad
     volumes:
-      - mssql-data:/var/opt/mssql
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'StrongPassw0rd!' -Q 'SELECT 1' || exit 1" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d swing_app_db" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
 
 volumes:
-  mssql-data:
+  postgres-data:
   app-data:

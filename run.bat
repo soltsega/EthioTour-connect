@@ -5,9 +5,9 @@ if not exist build\classes mkdir build\classes
 REM Download dependencies if lib folder doesn't exist
 if not exist lib mkdir lib
 REM lib is the directory where the dependencies are stored
-if not exist lib\mssql-jdbc-12.4.2.jre11.jar (
-    echo Downloading MS SQL JDBC...
-    powershell -Command "Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.4.2.jre11/mssql-jdbc-12.4.2.jre11.jar' -OutFile 'lib\mssql-jdbc-12.4.2.jre11.jar'"
+if not exist lib\postgresql-42.7.3.jar (
+    echo Downloading PostgreSQL JDBC...
+    powershell -Command "Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar' -OutFile 'lib\postgresql-42.7.3.jar'"
 )
 if not exist lib\HikariCP-5.1.0.jar (
     echo Downloading HikariCP...
@@ -61,6 +61,7 @@ if %ERRORLEVEL% EQU 0 (
     if not exist build\classes\resources mkdir build\classes\resources
     copy /Y src\main\resources\database.properties build\classes\resources\database.properties >nul
     copy /Y src\main\resources\seed_data.sql build\classes\resources\seed_data.sql >nul
+    copy /Y src\main\resources\postgresql_seed_data.sql build\classes\postgresql_seed_data.sql >nul
     
     echo Starting EthioTour Connect...
     echo.
