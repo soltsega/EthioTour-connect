@@ -62,6 +62,8 @@ if %ERRORLEVEL% EQU 0 (
     copy /Y src\main\resources\database.properties build\classes\resources\database.properties >nul
     copy /Y src\main\resources\seed_data.sql build\classes\resources\seed_data.sql >nul
     copy /Y src\main\resources\postgresql_seed_data.sql build\classes\postgresql_seed_data.sql >nul
+    if not exist build\classes\images mkdir build\classes\images
+    copy /Y src\main\resources\images\*.png build\classes\images\ >nul
     
     echo Starting EthioTour Connect...
     echo.

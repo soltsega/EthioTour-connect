@@ -1,6 +1,6 @@
 package com.ethiotour;
 
-import com.ethiotour.view.MainView;
+import com.ethiotour.view.AdminLoginView;
 
 /**
  * Main entry point for the EthioTour Connect application.
@@ -8,7 +8,7 @@ import com.ethiotour.view.MainView;
  */
 public class EthioTourApp {
     public static void main(String[] args) {
-        // Initialize and start the main application
-        MainView.main(args);
+        // Initialize and start the admin login before opening the dashboard.
+        AdminLoginView.main(args);
     }
 }
