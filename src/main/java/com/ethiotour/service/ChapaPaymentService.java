@@ -12,12 +12,14 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChapaPaymentService {
     private final HttpClient httpClient;
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(20);
 
     public ChapaPaymentService() {
         this.httpClient = HttpClient.newHttpClient();
@@ -34,6 +36,7 @@ public class ChapaPaymentService {
 
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(DatabaseConfig.getChapaInitializeUrl()))
+            .timeout(REQUEST_TIMEOUT)
             .header("Authorization", "Bearer " + secretKey)
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(payload))
@@ -82,6 +85,7 @@ public class ChapaPaymentService {
 
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(verifyUrl))
+            .timeout(REQUEST_TIMEOUT)
             .header("Authorization", "Bearer " + secretKey)
             .GET()
             .build();

@@ -41,6 +41,8 @@ public class CalendarView extends JFrame {
     private JLabel conversionResultLabel;
     private JPanel calendarGridPanel;
     private JLabel currentMonthLabel;
+    private JLabel gregorianFormatLabel;
+    private JLabel ethiopianFormatLabel;
     
     // Constructor
     // It calls methods to initialize components, set up the layout, event handlers, and update calendar info on startup
@@ -85,6 +87,10 @@ public class CalendarView extends JFrame {
         AppTheme.stylePrimaryButton(convertButton);
         gregorianInputField = new JTextField(12);
         ethiopianInputField = new JTextField(15);
+        gregorianInputField.setToolTipText("Use Gregorian format YYYY-MM-DD, for example 2026-06-22");
+        ethiopianInputField.setToolTipText("Use Ethiopian format YYYY-MM-DD, for example 2018-10-15");
+        gregorianFormatLabel = helperLabel("Format: YYYY-MM-DD, example 2026-06-22");
+        ethiopianFormatLabel = helperLabel("Format: YYYY-MM-DD, example 2018-10-15");
         conversionResultLabel = new JLabel("", SwingConstants.CENTER);
         conversionResultLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         
@@ -157,16 +163,22 @@ public class CalendarView extends JFrame {
         convertCard.add(new JLabel("Gregorian:"), gbcConv);
         gbcConv.gridx = 1;
         convertCard.add(gregorianInputField, gbcConv);
+
+        gbcConv.gridx = 1; gbcConv.gridy = 2;
+        convertCard.add(gregorianFormatLabel, gbcConv);
         
-        gbcConv.gridx = 0; gbcConv.gridy = 2;
+        gbcConv.gridx = 0; gbcConv.gridy = 3;
         convertCard.add(new JLabel("Ethiopian:"), gbcConv);
         gbcConv.gridx = 1;
         convertCard.add(ethiopianInputField, gbcConv);
+
+        gbcConv.gridx = 1; gbcConv.gridy = 4;
+        convertCard.add(ethiopianFormatLabel, gbcConv);
         
-        gbcConv.gridx = 0; gbcConv.gridy = 3; gbcConv.gridwidth = 2;
+        gbcConv.gridx = 0; gbcConv.gridy = 5; gbcConv.gridwidth = 2;
         convertCard.add(convertButton, gbcConv);
         
-        gbcConv.gridy = 4;
+        gbcConv.gridy = 6;
         convertCard.add(conversionResultLabel, gbcConv);
         
         // Card 4: Monthly Overview
@@ -368,10 +380,23 @@ public class CalendarView extends JFrame {
         
         holidayListPanel.add(item);
     }
+
+    private JLabel helperLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(AppTheme.SMALL_FONT);
+        label.setForeground(AppTheme.MUTED_TEXT);
+        return label;
+    }
     
     private void convertDate() {
         String gregorianText = gregorianInputField.getText().trim();
         String ethiopianText = ethiopianInputField.getText().trim();
+
+        if (!gregorianText.isEmpty() && !ethiopianText.isEmpty()) {
+            conversionResultLabel.setText("Fill only one date field at a time");
+            conversionResultLabel.setForeground(Color.RED);
+            return;
+        }
         
         if (!gregorianText.isEmpty()) {
             convertFromGregorian();
@@ -430,6 +455,14 @@ public class CalendarView extends JFrame {
             int year = Integer.parseInt(parts[0]);
             int month = Integer.parseInt(parts[1]);
             int day = Integer.parseInt(parts[2]);
+
+            if (month < 1 || month > 13) {
+                throw new IllegalArgumentException("Invalid month");
+            }
+            int maxDay = month == 13 ? (EthiopianCalendar.isEthiopianLeapYear(year) ? 6 : 5) : 30;
+            if (day < 1 || day > maxDay) {
+                throw new IllegalArgumentException("Invalid day");
+            }
             
             LocalDate gregorianDate = EthiopianCalendar.convertToGregorian(year, month, day);
             

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EthiopianCalendar {
+    private static final LocalDate ETHIOPIAN_ANCHOR_GREGORIAN = LocalDate.of(2025, 9, 11);
+    private static final int ETHIOPIAN_ANCHOR_YEAR = 2018;
     private static final Map<String, LocalDate> ethiopianHolidays = new HashMap<>();
     
     static {
@@ -17,30 +19,35 @@ public class EthiopianCalendar {
     }
     
     public static LocalDate convertToGregorian(int ethiopianYear, int ethiopianMonth, int ethiopianDay) {
-        // Simplified conversion - in production this would be more accurate
-        int gregorianYear = ethiopianYear + 8;
-        if (ethiopianMonth > 9 || (ethiopianMonth == 9 && ethiopianDay >= 11)) {
-            gregorianYear--;
-        }
-        
-        int gregorianMonth = ethiopianMonth + 2;
-        if (gregorianMonth > 12) {
-            gregorianMonth -= 12;
-        }
-        
-        return LocalDate.of(gregorianYear, gregorianMonth, ethiopianDay);
+        validateEthiopianDate(ethiopianYear, ethiopianMonth, ethiopianDay);
+
+        long days = daysBeforeEthiopianYear(ethiopianYear) - daysBeforeEthiopianYear(ETHIOPIAN_ANCHOR_YEAR);
+        days += (long) (ethiopianMonth - 1) * 30;
+        days += ethiopianDay - 1L;
+
+        return ETHIOPIAN_ANCHOR_GREGORIAN.plusDays(days);
     }
     
     public static int[] convertToEthiopian(LocalDate gregorianDate) {
-        // Simplified conversion - in production this would be more accurate
-        int ethiopianYear = gregorianDate.getYear() - 8;
-        int ethiopianMonth = gregorianDate.getMonthValue() - 2;
-        if (ethiopianMonth < 1) {
-            ethiopianMonth += 12;
-            ethiopianYear++;
+        long daysFromAnchor = ChronoUnit.DAYS.between(ETHIOPIAN_ANCHOR_GREGORIAN, gregorianDate);
+        int ethiopianYear = ETHIOPIAN_ANCHOR_YEAR;
+
+        if (daysFromAnchor >= 0) {
+            while (daysFromAnchor >= lengthOfEthiopianYear(ethiopianYear)) {
+                daysFromAnchor -= lengthOfEthiopianYear(ethiopianYear);
+                ethiopianYear++;
+            }
+        } else {
+            while (daysFromAnchor < 0) {
+                ethiopianYear--;
+                daysFromAnchor += lengthOfEthiopianYear(ethiopianYear);
+            }
         }
-        
-        return new int[]{ethiopianYear, ethiopianMonth, gregorianDate.getDayOfMonth()};
+
+        int ethiopianMonth = (int) (daysFromAnchor / 30) + 1;
+        int ethiopianDay = (int) (daysFromAnchor % 30) + 1;
+
+        return new int[]{ethiopianYear, ethiopianMonth, ethiopianDay};
     }
     
     public static String getEthiopianDateDisplay(LocalDate gregorianDate) {
@@ -79,5 +86,32 @@ public class EthiopianCalendar {
             return ChronoUnit.DAYS.between(date, holiday);
         }
         return -1;
+    }
+
+    public static boolean isEthiopianLeapYear(int ethiopianYear) {
+        return ethiopianYear % 4 == 3;
+    }
+
+    private static int lengthOfEthiopianYear(int ethiopianYear) {
+        return isEthiopianLeapYear(ethiopianYear) ? 366 : 365;
+    }
+
+    private static long daysBeforeEthiopianYear(int ethiopianYear) {
+        long previousYears = ethiopianYear - 1L;
+        return previousYears * 365 + previousYears / 4;
+    }
+
+    private static void validateEthiopianDate(int year, int month, int day) {
+        if (year < 1) {
+            throw new IllegalArgumentException("Ethiopian year must be positive");
+        }
+        if (month < 1 || month > 13) {
+            throw new IllegalArgumentException("Ethiopian month must be between 1 and 13");
+        }
+
+        int maxDay = month == 13 ? (isEthiopianLeapYear(year) ? 6 : 5) : 30;
+        if (day < 1 || day > maxDay) {
+            throw new IllegalArgumentException("Ethiopian day must be between 1 and " + maxDay);
+        }
     }
 }

@@ -16,6 +16,14 @@ import java.net.URI;
 import java.util.List;
 
 public class BookingsView extends JFrame {
+    private static final String[] PAYMENT_METHODS = {
+        "Telebirr",
+        "Bank Transfer",
+        "Cash",
+        "Credit/Debit Card",
+        "Chapa"
+    };
+
     private MainController controller;
     private IDatabaseService dbService;
     private BookingService bookingService;
@@ -72,7 +80,7 @@ public class BookingsView extends JFrame {
         // Action buttons
         newBookingButton = new JButton("New Booking");
         confirmButton = new JButton("Confirm Selected");
-        processPaymentButton = new JButton("Pay with Chapa");
+        processPaymentButton = new JButton("Chapa Checkout");
         verifyPaymentButton = new JButton("Verify Chapa Payment");
         cancelButton = new JButton("Cancel Selected");
         backButton = new JButton("Back to Main");
@@ -82,6 +90,8 @@ public class BookingsView extends JFrame {
         AppTheme.styleSecondaryButton(verifyPaymentButton);
         AppTheme.styleDangerButton(cancelButton);
         AppTheme.styleSecondaryButton(backButton);
+        processPaymentButton.setToolTipText("Starts hosted Chapa checkout. Requires a valid CHAPA_SECRET_KEY and internet connection.");
+        verifyPaymentButton.setToolTipText("Checks Chapa using the transaction reference saved on the booking.");
         
         // New booking form
         tourCombo = new JComboBox<>();
@@ -390,25 +400,46 @@ public class BookingsView extends JFrame {
             return;
         }
         
-        String paymentMethod = JOptionPane.showInputDialog(this, 
-            "Enter payment method (e.g., Telebirr, Bank Transfer):", 
-            "Payment Method", JOptionPane.QUESTION_MESSAGE);
-        
-        if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
-            String paymentReference = JOptionPane.showInputDialog(this, 
-                "Enter payment reference:", "Payment Reference", JOptionPane.QUESTION_MESSAGE);
+        JComboBox<String> paymentMethodCombo = new JComboBox<>(PAYMENT_METHODS);
+        JTextField paymentReferenceField = new JTextField(20);
+
+        JPanel paymentPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(6, 6, 6, 6);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        paymentPanel.add(new JLabel("Payment method:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1;
+        paymentPanel.add(paymentMethodCombo, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0;
+        paymentPanel.add(new JLabel("Payment reference:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1;
+        paymentPanel.add(paymentReferenceField, gbc);
+
+        int option = JOptionPane.showConfirmDialog(this, paymentPanel,
+            "Confirm Payment", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        if (option == JOptionPane.OK_OPTION) {
+            String paymentMethod = (String) paymentMethodCombo.getSelectedItem();
+            String paymentReference = paymentReferenceField.getText().trim();
+
+            if (paymentReference.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a payment reference.",
+                    "Validation Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            boolean success = bookingService.confirmBooking(bookingId, paymentMethod, paymentReference);
             
-            if (paymentReference != null && !paymentReference.trim().isEmpty()) {
-                boolean success = bookingService.confirmBooking(bookingId, paymentMethod.trim(), paymentReference.trim());
-                
-                if (success) {
-                    loadBookings();
-                    JOptionPane.showMessageDialog(this, "Booking confirmed successfully.", 
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Failed to confirm booking.", 
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                }
+            if (success) {
+                loadBookings();
+                JOptionPane.showMessageDialog(this, "Booking confirmed successfully.", 
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to confirm booking.", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -447,7 +478,7 @@ public class BookingsView extends JFrame {
                     "\nAfter completing payment, select this booking and click Verify Chapa Payment.",
                     "Chapa Checkout", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Failed to start Chapa checkout:\n" + result.getMessage(),
+                JOptionPane.showMessageDialog(this, formatChapaFailure("Failed to start Chapa checkout", result),
                     "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
@@ -478,11 +509,20 @@ public class BookingsView extends JFrame {
                 "Payment Verified", JOptionPane.INFORMATION_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(this,
-                "Chapa payment is not successful yet.\nStatus: " + 
-                    (result.getStatus() != null ? result.getStatus() : "unknown") +
-                    "\nMessage: " + result.getMessage(),
+                formatChapaFailure("Chapa payment is not successful yet", result),
                 "Payment Not Verified", JOptionPane.WARNING_MESSAGE);
         }
+    }
+
+    private String formatChapaFailure(String title, ChapaPaymentResult result) {
+        String status = result.getStatus() != null ? result.getStatus() : "unknown";
+        String message = result.getMessage() != null ? result.getMessage() : "No details returned.";
+
+        return title + "\n"
+            + "Status: " + status + "\n"
+            + "Message: " + message + "\n\n"
+            + "Check that CHAPA_SECRET_KEY is valid, the computer is online, and the Chapa initialize/verify URLs are correct.\n"
+            + "For offline/manual payments, use Confirm Selected and choose Telebirr, Bank Transfer, Cash, or Card.";
     }
 
     private void openCheckoutUrl(String checkoutUrl) {
